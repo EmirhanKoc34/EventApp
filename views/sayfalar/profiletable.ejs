@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="/css/profile.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+    <div class="profileTable">
+        <p>
+            <span>Kullanıcı Adı:</span>
+            <span id="name"></span>
+        </p>
+        <p>
+            <span>Hash:</span>
+            <span id="hash"></span>
+        </p>
+        <p>
+            <span>GroupID:</span>
+            <span id="groupID"></span>
+        </p>
+        <p>
+            <span>UserID:</span>
+            <span id="userID"></span>
+        </p>
+    </div>
+    
+</body>
+<script>
+    let username = `<%= username %>`;
+    
+    fetch('/getProfileData',{
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ username })
+    })
+    .then(response => response.text())
+    .then(result => {
+        const data = JSON.parse(result);
+        document.getElementById("name").innerHTML = data[0].username;
+        document.getElementById("hash").innerHTML = data[0].password;
+        document.getElementById("groupID").innerHTML = data[0].groupID;
+        document.getElementById("userID").innerHTML = data[0].userID;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+</script>
+</html>

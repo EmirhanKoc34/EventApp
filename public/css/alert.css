@@ -1,0 +1,93 @@
+#message-modal
+{
+    display:block; 
+    position:fixed; 
+    top:0; 
+    left:0; 
+    width:100%; 
+    height:100%; 
+    background-color:rgba(0, 0, 0, 0.6); 
+    z-index:99;
+}
+#modal-message
+{
+    display:block; 
+    background: white; 
+    border-radius: 5vmin; 
+    width: 30vmax; 
+    height: fit-content; /* fit-content mozillada çalışmadığı için vh kullanıcaz*/
+    margin:auto; 
+    position:absolute; 
+    top:0; 
+    left:0; 
+    right:0; 
+    bottom:0; 
+    z-index:1000;
+}
+
+#context
+{
+    display: block; 
+    font-size: 5vmin; 
+    text-align: center; 
+    margin-top: 10%; 
+    margin-bottom: 0;
+}
+
+#message
+{
+    display: block; 
+    font-size: 3vmin; 
+    text-align: center;
+    word-break: break-word; /* Breaks long words onto the next line */
+    hyphens: auto; /* Automatically hyphenates text when necessary */
+    overflow-wrap: break-word; /* Allows breaking long words onto the next line */
+    padding: 0 20px;
+}
+
+#close-modal
+{
+    display:block;
+     background-color: gray; 
+     margin: 0 auto; 
+     font-size:2.5vmin; 
+     color:white; 
+     cursor:pointer; 
+     z-index:1000;
+     border-radius: 1.5vmin;
+
+}
+
+#confirm-modal
+{
+    display:block; 
+    background-color: #254610;
+    margin: 0 auto; 
+    font-size:2.5vmin; 
+    color:white; 
+    cursor:pointer; 
+    z-index:1000;
+    border-radius: 1.5vmin;
+
+}
+
+@Media only screen and (max-width: 480px)
+{
+    #message
+    {
+        font-size: 3vmax;
+    }
+    #context
+    {
+        font-size: 5vmax;
+    }
+    #confirm-modal,#close-modal
+    {
+        font-size: 2.5vmax;
+        max-width: 30%;
+    }
+    #modal-message
+    {
+        width: 80%;
+    }
+}

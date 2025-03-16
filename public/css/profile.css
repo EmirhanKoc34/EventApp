@@ -1,0 +1,30 @@
+.profileTable
+{
+    font-size: 15px;
+    padding-top: 0px;
+    margin: 0 auto;
+    margin-bottom: 20px;
+    border: 6px solid #254610;
+    background-color: #c8eeb0;
+    color: rgb(0, 0, 0);
+    word-wrap: break-word;
+    
+    border-radius: 2vmin;
+    width: 30%;
+    height: auto;
+    text-align: left;
+    padding: 5px;
+    padding-left: 25px;
+    margin-top: 5%;
+    box-shadow: 5px 5px rgba(0,0,0,0.5);
+}
+
+
+
+@Media only screen and (max-width: 480px)
+{
+    .profileTable
+    {
+        width: 80%;
+    }
+}

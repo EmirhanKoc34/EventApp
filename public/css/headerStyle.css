@@ -1,0 +1,200 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color:#eef8e8;
+}
+.headerbutton:focus, #menu:focus, .nav-links li a:focus, .close-btn:focus
+{
+    transition: 0.2s;
+    outline: 3px solid #4A90E2; /* Blue outline for focus visibility */
+    outline-offset: 2px;       /* Offset for better appearance */
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.5);
+    border-radius: 1vmin;
+}
+
+header {
+    background-color: #254610;
+    color: white;
+    padding: 1.5% 0;
+    font-size: 2.5vh;
+    width:auto;
+    text-align: center;
+}
+
+header nav a {
+    color: white;
+    
+    text-decoration: none;
+}
+.headerbutton
+{
+    transition-duration: 0.2s;
+    background-color: #eef8e8;
+    padding: 0.8%;
+    padding-left: 1.4%;
+    padding-right: 1.4%;
+    border: 1px solid black;
+    border-radius: 1vmax;
+    color:black;
+    font-size: 2.6vmin;
+    
+}
+.headerbutton:hover
+{
+    background-color: #cad3c4;
+    
+}
+#giris
+{
+    margin-left: 30%;
+}
+#anasayfa
+{
+    margin-right: 20vmax;/*for putting other buttons to the right*/
+}
+
+#menu
+{
+    display: none;
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+.hamburger
+{
+    
+    width: 35px;
+    height: 5px;
+    background-color: rgb(255, 255, 255);
+    margin: 6px 0;
+    
+}
+.nav-links {
+    
+    list-style: none;
+    position: fixed;
+    top: 0;
+    right: -90%; /* Start hidden off-screen to the right */
+    height: 100%; /* Cover the full height */
+    width: 70%; /* Cover 90% of the screen width */
+    background-color: #2546109c;
+    backdrop-filter: blur(5px);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    margin: 0;
+    transition: right 0.3s ease; /* Smooth slide-in effect */
+    z-index: 1000;
+}
+
+.nav-links.open {
+    display:none;
+    right: 0; /* Slide in from the right */
+}
+
+.nav-links li {
+    display: none;
+    margin: 20px 0;
+}
+
+.nav-links li a {
+    color: white;
+    text-decoration: none;
+    font-size: 10vmin;
+}
+
+.close-btn {
+    display: none;
+    position: absolute;
+    top: 5vmin;
+    right: 5vmin;
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 10vmin;
+    cursor: pointer;
+}
+
+
+.container
+{
+    display: none;
+}
+#namemobile
+{
+    display: inline-block;
+    font-size: 3vh;
+   margin-left: 3%;
+
+}
+
+
+
+@Media only screen and (max-width: 480px){/* for phones*/
+    
+    .container {
+        display: flex;
+        align-items: center; /* Align items vertically in the center */
+        justify-content: space-between; /* Adjust spacing between items if needed */
+    }
+    .headerbutton
+    {
+        display: none;
+    }
+    #giris
+    {
+        display:inherit;
+        width: 15%;
+        font-size: 2.8vmax;
+        margin-left: 75%;
+        padding: 1.5% 2%;
+        min-width: fit-content;
+    }
+    header{
+        padding: 4% 0; 
+        
+        
+    }
+    #menu
+    {
+        display: inline-block;
+        margin-right: 3%;
+    }
+    #nameheader
+    {
+        display: none;
+    }
+    .close-btn,.nav-links li
+    {
+        display: inline-block;
+    }
+    .nav-links.open
+    {
+        display: flex;
+        flex-direction: column;
+        flex-wrap: nowrap;
+        align-content: normal;
+        justify-content: center;
+        align-items: center;
+    }
+}
+
+@Media only screen and (min-width: 480px) and (max-width: 780px) {/*for tablets*/
+
+    header{
+        padding: 3% 0; 
+    }
+    .headerbutton
+    {
+        padding: 1.5% 1%;
+    }
+    #anasayfa
+    {
+        margin-right: 20vmin;
+    }
+
+}

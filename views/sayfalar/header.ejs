@@ -1,0 +1,67 @@
+<!-- views/partials/header.ejs -->
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="/css/headerStyle.css" rel="stylesheet" type="text/css">
+    <style>
+        header
+        {
+            box-shadow: 0 -6px 10px 10px rgba(0, 0, 0, 0.479);
+           
+        }
+        
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <a href="/anasayfa" class="headerbutton" id="anasayfa">Anasayfa</a>
+            <% if (loggedin) { %>
+                <div class="container">
+                <span id="namemobile" style="padding: 0.8%;" ><%= username %></span>
+                
+                <button id="menu">
+                    <div class="hamburger"></div>
+                    <div class="hamburger"></div>
+                    <div class="hamburger"></div>
+                </button>
+                </div>
+                
+                <span id="nameheader" style="padding: 0.8%;" ><%= username %></span>
+
+                <ul class="nav-links" id="nav-links">
+                    <button class="close-btn" id="close-btn">&times;</button>
+                    <li><a href="/anasayfa" >Anasayfa</a></li>
+                    <li><a href="/profile">Profil</a></li>
+                    <li><a href="/logout" >Çıkış Yap</a></li>
+                </ul>
+
+
+                
+                <a href="/profile" id="game" class="headerbutton">Profil</a>
+                <a href="/logout" class="headerbutton" >Çıkış Yap</a>
+                
+            <% } else { %>
+                <a href="/login" id="giris" class="headerbutton" >Giriş</a>
+            <% } %>
+        </nav>
+    </header>
+    <script>
+        const menuButton = document.getElementById('menu');
+const navLinks = document.getElementById('nav-links');
+const closeButton = document.getElementById('close-btn');
+
+menuButton.addEventListener('click', () => {
+    navLinks.classList.toggle('open');
+    document.get
+});
+
+closeButton.addEventListener('click', () => {
+    navLinks.classList.remove('open');
+});
+    </script>
+</body>
+</html>
