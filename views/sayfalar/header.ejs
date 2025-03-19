@@ -35,12 +35,13 @@
                 <ul class="nav-links" id="nav-links">
                     <button class="close-btn" id="close-btn">&times;</button>
                     <li><a href="/anasayfa" >Anasayfa</a></li>
+                    <li><a href="/settings">Settings</a></li>
                     <li><a href="/profile">Profil</a></li>
                     <li><a href="/logout" >Çıkış Yap</a></li>
                 </ul>
 
 
-                
+                <a href="/settings" id="game" class="headerbutton">Settings</a>
                 <a href="/profile" id="game" class="headerbutton">Profil</a>
                 <a href="/logout" class="headerbutton" >Çıkış Yap</a>
                 
@@ -50,6 +51,17 @@
         </nav>
     </header>
     <script>
+let theme = "<%=theme%>";// this var is used in all of the pages that using header
+
+const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+
+if (theme === "dark" || (systemPrefersDark && theme === "system")) {
+  document.body.classList.add('dark-mode');
+}
+else if (theme === "light" || (!systemPrefersDark && theme === "system")) {
+  document.body.classList.add('light-mode');
+}
+
         const menuButton = document.getElementById('menu');
 const navLinks = document.getElementById('nav-links');
 const closeButton = document.getElementById('close-btn');

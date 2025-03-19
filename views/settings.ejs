@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <%- include('sayfalar/header', { title: __('settings') }) %>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="/css/settings.css" rel="stylesheet" type="text/css">
+    <script>
+        <%- include('./sayfalar/alert.js') %>
+    </script>
+</head>
+<body>
+
+    <details class="theme-switcher">
+        <summary style="margin-top: 1.5vh;"><%= __('choosetheme') %></summary>
+        <label class="theme-option">
+            <input type="radio" style="margin-top: 20px;" name="theme" id="dark-theme" value="dark"> <%= __('darktheme') %>
+        </label><br>
+        <label class="theme-option">
+            <input type="radio" style="margin-top: 20px;" name="theme" id="light-theme" value="light"> <%= __('lighttheme') %>
+        </label><br>
+        <label class="theme-option">
+            <input type="radio" style="margin-top: 20px;" name="theme" id="system-default" value="system"> <%= __('systemdefault') %>
+        </label>
+    </details>
+
+    <details class="theme-switcher">
+        <summary style="margin-top: 1.5vh;"><%= __('chooselang') %></summary>
+        <label class="theme-option">
+            <input type="radio" style="margin-top: 20px;" id="tur"> Türkçe
+        </label><br>
+        <label class="theme-option">
+            <input type="radio" style="margin-top: 20px;" id="en"> English
+        </label><br>
+    </details>
+
+    <div class="theme-switcher">
+        
+        <button class="logout-button"  value="<%= __('logout') %>" onclick="logout()">
+            <span class="explanation-text"><%= __('logout') %></span>
+        </button>
+        
+    </div>
+
+
+
+
+    <script>
+        function logout()
+        {
+
+            location.replace('/logout?platform=web');
+        }
+    </script>
+
+
+</body>
+
+<script>
+        if(theme === "dark")//* these marked theme  variables are coming from header we can not create new theme var because it gives error
+        {
+            document.getElementById("dark-theme").checked = true;
+        }
+        else if(theme === "light")//*
+        {
+            document.getElementById("light-theme").checked = true;
+        }
+        else if(theme === "system")//*
+        {
+            document.getElementById("system-default").checked = true;
+        }
+
+        var lang = "<%=lang%>";
+
+        if(lang == "en")
+        {
+            document.getElementById("en").checked = true;
+        }
+        else if(lang == "tr")
+        {
+            document.getElementById("tur").checked = true;
+        }
+        
+
+        function setTheme(theme) {
+            console.log(theme);
+
+            fetch('/update-theme', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ theme: theme })
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Theme preference updated');
+                    window.location.reload();
+                } else {
+                    console.log('Failed to update theme preference');
+                }
+            }).catch(error => console.error('Error:', error));
+        }
+
+        function setLang(lang) {
+            console.log(lang);
+
+            fetch('/update-lang', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ lang: lang })
+            }).then(response => {
+                if (response.ok) {
+                    console.log('Language preference updated');
+                    window.location.reload();
+                } else {
+                    console.log('Failed to update language preference');
+                }
+            }).catch(error => console.error('Error:', error));
+        }
+
+        // Add event listeners to the checkboxes
+        document.getElementById('dark-theme').addEventListener('change', function() {
+            if (this.checked) setTheme('dark');
+        });
+
+        document.getElementById('light-theme').addEventListener('change', function() {
+            if (this.checked) setTheme('light');
+        });
+
+        document.getElementById('system-default').addEventListener('change', function() {
+            if (this.checked) setTheme('system');
+        });
+
+        document.getElementById('dark-theme').addEventListener('change', function() {
+            if (this.checked) setTheme('dark');
+        });
+
+        document.getElementById('light-theme').addEventListener('change', function() {
+            if (this.checked) setTheme('light');
+        });
+
+        document.getElementById('tur').addEventListener('change', function() {
+            if (this.checked) setLang('tr');
+        });
+
+        document.getElementById('en').addEventListener('change', function() {
+            if (this.checked) setLang('en');
+        });
+</script>
+</html>
