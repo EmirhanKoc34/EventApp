@@ -19,7 +19,7 @@ var con = mysql.createConnection({//mysql connections
     host: "localhost",
     user: "root",
     password: "Mysql123!",
-    database: "login",
+    database: "eventapp",
     port: 3306
     });
 
@@ -65,7 +65,7 @@ function isHavePriv(privType) {
         let username = req.user.username;
 
         // SQL query to get the user's groupID based on username
-        let userQuery = 'SELECT groupID FROM login.users WHERE BINARY username = ?';
+        let userQuery = 'SELECT user_Group_ID FROM users WHERE BINARY user_Name = ?';
 
         con.query(userQuery, [username], (error, userResults) => {
             if (error) {
@@ -83,14 +83,14 @@ function isHavePriv(privType) {
 
             // Determine the condition field based on privType
             switch (privType) {
-                case 1: // For game page
-                    priv = 'profile_priv';
+                case 1: //For Student Privilege
+                    priv = 'ogrenci_Priv';
                     break;
-                case 2: // For table page 
-                    priv = 'table_priv';
+                case 2: //For Teacher Privilege
+                    priv = 'ogretmen_Priv';
                     break;
-                case 3: //for text detection page
-                    priv = 'image_priv';
+                case 3: //For Admin Privilege
+                    priv = 'admin_Priv';
                     break;
                 default:
                     return res.status(400).send('Invalid privilege type');
@@ -99,7 +99,7 @@ function isHavePriv(privType) {
             // Construct the SQL query
             let usernamequery = [`"${username}"`];
             
-            let privQuery = `SELECT * FROM users JOIN login.groups ON users.groupID = login.groups.groupID JOIN group_privileges on groups.privID = group_privileges.group_privilege_id  WHERE BINARY users.username = ${usernamequery} AND group_privileges.${priv};`;
+            let privQuery = `SELECT * FROM users JOIN user_groups ON users.user_Group_ID = user_groups.group_ID JOIN group_privilages on user_groups.privID = group_privilages.group_Priv_ID  WHERE BINARY users.user_Name = ${usernamequery} AND group_privilages.${priv};`;
 
             // Execute the privilege check query
             con.query(privQuery, (error, privResults) => {
@@ -174,7 +174,7 @@ app.get("/profile",isAuthenticated, isHavePriv(1), (req,res) => {
 app.post('/getProfileData', (req, res) => {
     const { username }  = req.body;
     
-    const query = `SELECT * from login.users WHERE BINARY username = ?;`;
+    const query = `SELECT * from users WHERE BINARY user_Name = ?;`;
     const values = [username];
     
     con.query(query, values, (err, result) => {
@@ -236,8 +236,7 @@ app.get("/login/check", (req, res) => {
         password: req.query.password
     };
     let hashedPassword = hashPassword(person.password);// hashes the inputed password
-    console.log(person);
-    let query = 'SELECT * FROM login.users WHERE BINARY username = ?;';
+    let query = 'SELECT * FROM users WHERE BINARY user_Name = ?;';
     let name = [person.username];
     
     con.query(query, name, function (err, results) {
@@ -246,16 +245,18 @@ app.get("/login/check", (req, res) => {
         }
        
         if (results.length === 1) {
-            let sqlStoredHashedPassword = results[0].password; // we have already get the password with the first query so we are just checking it here
-            
+            let sqlStoredHashedPassword = results[0].user_Password; // we have already get the password with the first query so we are just checking it here
+            console.log(sqlStoredHashedPassword, hashedPassword);
             if (sqlStoredHashedPassword === hashedPassword) {
                 const token = jwt.sign({ username: person.username, id: results[0].userID }, JWT_SECRET, { expiresIn: '30d' });// creates token 
                 res.cookie('token', token, { httpOnly: true }); //stores that token in cookie
                 res.redirect("/profile");
             } else {//Wrong password
+                console.log('Wrong PAss')
                 res.redirect("/login");
             }
         } else {//Wrong username
+            console.log('wronusername');
             res.redirect("/login");
         }
     });
@@ -280,7 +281,7 @@ app.get("/signup/check", (req,res)=>
         username: req.query.username,
         password: req.query.password
     }
-    let usercheck = 'SELECT * FROM login.users WHERE BINARY username = ?;';
+    let usercheck = 'SELECT * FROM users WHERE BINARY user_Name = ?;';
     let name = [person.username];
     let hashedPassword = hashPassword(person.password);
 
@@ -292,7 +293,7 @@ app.get("/signup/check", (req,res)=>
         if (results.length > 0) {
             return res.send(`betterAlert(3, "Bu Kullanıcı adı bulunuyor, giriş yapın yada başka bir kullanıcı adı seçin", "Hata!");`);
         } else {
-            let createUserQuery = `INSERT INTO login.users VALUES("${person.username}","${hashedPassword}",2,0);`;// Creates user with person.username, person.password , groupID = 2 , and the automatic userID
+            let createUserQuery = `INSERT INTO users VALUES(0,"${person.username}","${hashedPassword}",1);`;// Creates user with person.username, person.password , groupID = 2 , and the automatic userID
 
             con.query(createUserQuery, function (err, result) {
                 if (err) {

@@ -40,10 +40,10 @@
     .then(response => response.text())
     .then(result => {
         const data = JSON.parse(result);
-        document.getElementById("name").innerHTML = data[0].username;
-        document.getElementById("hash").innerHTML = data[0].password;
-        document.getElementById("groupID").innerHTML = data[0].groupID;
-        document.getElementById("userID").innerHTML = data[0].userID;
+        document.getElementById("name").innerHTML = data[0].user_Name;
+        document.getElementById("hash").innerHTML = data[0].user_Password;
+        document.getElementById("groupID").innerHTML = data[0].user_Group_ID;
+        document.getElementById("userID").innerHTML = data[0].user_ID;
     })
     .catch(error => {
         console.error('Error:', error);
