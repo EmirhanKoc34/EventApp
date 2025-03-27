@@ -75,31 +75,6 @@ input:focus
     margin-top: 4%;
   }
 
-
-
-body.dark-mode input[type="radio"]:checked 
-{
-    accent-color: #052d6e;
-}
-
-body.dark-mode .theme-switcher
-{
-    border: 6px solid #052d6e;
-    background-color: #414141;
-    color: whitesmoke;
-}
-
-body.dark-mode input[type="password"]
-{
-    background-color: #747474;
-    color: white;
-}
-
-body.dark-mode ::placeholder
-{
-    color: white;
-}
-
 @Media only screen and (max-width: 480px)
 {
     .theme-switcher

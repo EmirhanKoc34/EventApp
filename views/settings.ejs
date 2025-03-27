@@ -10,20 +10,6 @@
     </script>
 </head>
 <body>
-
-    <details class="theme-switcher">
-        <summary style="margin-top: 1.5vh;"><%= __('choosetheme') %></summary>
-        <label class="theme-option">
-            <input type="radio" style="margin-top: 20px;" name="theme" id="dark-theme" value="dark"> <%= __('darktheme') %>
-        </label><br>
-        <label class="theme-option">
-            <input type="radio" style="margin-top: 20px;" name="theme" id="light-theme" value="light"> <%= __('lighttheme') %>
-        </label><br>
-        <label class="theme-option">
-            <input type="radio" style="margin-top: 20px;" name="theme" id="system-default" value="system"> <%= __('systemdefault') %>
-        </label>
-    </details>
-
     <details class="theme-switcher">
         <summary style="margin-top: 1.5vh;"><%= __('chooselang') %></summary>
         <label class="theme-option">
@@ -57,19 +43,6 @@
 </body>
 
 <script>
-        if(theme === "dark")//* these marked theme  variables are coming from header we can not create new theme var because it gives error
-        {
-            document.getElementById("dark-theme").checked = true;
-        }
-        else if(theme === "light")//*
-        {
-            document.getElementById("light-theme").checked = true;
-        }
-        else if(theme === "system")//*
-        {
-            document.getElementById("system-default").checked = true;
-        }
-
         var lang = "<%=lang%>";
 
         if(lang == "en")
@@ -81,25 +54,6 @@
             document.getElementById("tur").checked = true;
         }
         
-
-        function setTheme(theme) {
-            console.log(theme);
-
-            fetch('/update-theme', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ theme: theme })
-            }).then(response => {
-                if (response.ok) {
-                    console.log('Theme preference updated');
-                    window.location.reload();
-                } else {
-                    console.log('Failed to update theme preference');
-                }
-            }).catch(error => console.error('Error:', error));
-        }
 
         function setLang(lang) {
             console.log(lang);
@@ -119,27 +73,6 @@
                 }
             }).catch(error => console.error('Error:', error));
         }
-
-        // Add event listeners to the checkboxes
-        document.getElementById('dark-theme').addEventListener('change', function() {
-            if (this.checked) setTheme('dark');
-        });
-
-        document.getElementById('light-theme').addEventListener('change', function() {
-            if (this.checked) setTheme('light');
-        });
-
-        document.getElementById('system-default').addEventListener('change', function() {
-            if (this.checked) setTheme('system');
-        });
-
-        document.getElementById('dark-theme').addEventListener('change', function() {
-            if (this.checked) setTheme('dark');
-        });
-
-        document.getElementById('light-theme').addEventListener('change', function() {
-            if (this.checked) setTheme('light');
-        });
 
         document.getElementById('tur').addEventListener('change', function() {
             if (this.checked) setLang('tr');

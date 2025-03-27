@@ -164,7 +164,7 @@ app.get('/', (req, res) => {
 
 app.get("/profile",isAuthenticated, isHavePriv(1), (req,res) => {
     res.render("profile",{
-        title: 'Text Detection',
+        title: 'Profile',
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null,
         theme: req.cookies.theme
@@ -190,20 +190,38 @@ app.post('/getProfileData', (req, res) => {
     });
 });
 
-app.post('/update-theme', (req, res) => {
-
-    // "theme" cookie is only used in header.ejs and declared variable in there we can use the same variable in the 
-    // other parts because they all have header in it. If we want to use it without header we should declare new variable
-
-    const theme = req.body.theme; // Get the theme from the request body
-
-    if (theme === 'dark' || theme === 'light'  || theme === 'system') {
-        // Set a cookie with the theme preference
-        res.cookie('theme', theme, { maxAge: 25920000000, httpOnly: true }); // 300 days expiration
-        res.status(200).send('Theme cookie updated');
-    } else {
-        res.status(400).send('Invalid theme');
+app.post('/createEvent',isAuthenticated, isHavePriv(2), (req, res) => {
+    let { organizerid: userid, eventName, date: eventDate, time: eventTime, roomid: eventRoom } = req.body;
+    console.log("Received Data:", req.body);
+    if (!eventName) {
+        return res.status(400).send("Error: eventName is required");
     }
+
+    let query = "INSERT INTO `eventapp`.`events` (`events_Name`, `approved`, `events_Date`, `events_Time`, `organizer_ID`, `events_Room_ID`) VALUES (?, ?, ?, ?, ?, ?)";
+    con.query(query, [eventName, null, eventDate, eventTime, userid, eventRoom], (err, result) => {
+        if (err) {
+            return res.status(500).send("Failed to Insert Event: " + err.message);
+        }
+        res.send({ message: "Event Created", eventID: result.insertId });
+    });
+});
+
+
+app.post('/getEvents',isAuthenticated, isHavePriv(1), (req,res)=>
+{
+    let query =`select events_Name, events_Date,events_Time,users.user_Name, rooms.rooms_Name from events join users on events.organizer_ID = users.user_ID join rooms on events.events_Room_ID = rooms.rooms_ID where approved = 1 order by events_Date,events_Time;`;
+    con.query(query,(err,result)=>
+    {        
+        if (err) {
+            return res.status(500).send("Failed Get Events Data");
+        } 
+        if (result.length > 0) {
+            res.send(result);
+        } else {
+            return res.status(500).send("Cannot get data");
+        }
+
+    });
 });
 
 app.post('/update-lang', (req, res) => {
