@@ -6,6 +6,41 @@ var app = express();
 var path = require('path');
 var cookieParser = require('cookie-parser');
 const i18n = require('i18n');
+const multer = require('multer');
+const fs = require('fs');
+
+// Set up Multer storage engine (optional, for custom file naming and storage locations)
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        const eventFolder = path.join(__dirname, 'public', 'uploads');
+        // Ensure the uploads folder exists
+        cb(null, eventFolder);
+    },
+    filename: (req, file, cb) => {
+        const ext = path.extname(file.originalname);
+        const newFileName = Date.now() + ext;
+        cb(null, newFileName); // Set custom file name to avoid overwriting files
+    }
+});
+
+// Multer instance for handling file uploads
+const upload = multer({
+    storage: storage,   // Custom storage settings
+    limits: {
+        fileSize: 10 * 1024 * 1024, // Limit file size to 10MB (optional)
+    },
+    fileFilter: (req, file, cb) => {
+        // Allow only image files
+        if (file.mimetype.startsWith('image/')) {
+            cb(null, true);
+        } else {
+            cb(new Error('Only image files are allowed!'), false);
+        }
+    }
+});
+
+// Middleware for handling multiple file uploads
+const uploadMultiple = upload.array('images', 5); // Up to 5 images
 
 const JWT_SECRET = '7324f7115b13969bb06d94dfb332ef216383aa29700b460a72b3baef689ff6bfdb6aaf1fda8a0adfe0d2111663b49bce5d71ffb43bbbcd115c52a029313bafa6a9188f666b5809b86326529d4d1a0790923d4d613f54913fbfa6b6a3c4d4db5fa37037ccd9ace700fd238b92facf4bc54ec8cf93d8d7fc9fcd6e339656159f4ee5f692bcc6e8e48915e4c0f26fd45b6f6f6df3be0460ca7c0e2ee2cd0029d934b662409a4c57073437e7b7635ce7f6c54ae5298bee463ac6005651238d96e90b821277b9252258b511fb496b8f52fc7081c968b6887e5117d3b96dc40c5348e7b6d525724e89769c0022bb44ae8b642713ffc65fa0fd0db34660d1ffddf72060'; // Change this to a strong secret key
 
@@ -138,7 +173,6 @@ app.get("/anasayfa", (req,res) => {
         title: 'Anasayfa',
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null,
-        theme: req.cookies.theme,
     });
 });
 
@@ -147,7 +181,6 @@ app.get("/settings", (req,res) => {
         title: 'Anasayfa',
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null,
-        theme: req.cookies.theme,
         lang: req.cookies.locale
     });
 });
@@ -167,7 +200,6 @@ app.get("/profile",isAuthenticated, isHavePriv(1), (req,res) => {
         title: 'Profile',
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null,
-        theme: req.cookies.theme
     });
 });
 
@@ -190,26 +222,176 @@ app.post('/getProfileData', (req, res) => {
     });
 });
 
-app.post('/createEvent',isAuthenticated, isHavePriv(2), (req, res) => {
-    let { organizerid: userid, eventName, date: eventDate, time: eventTime, roomid: eventRoom } = req.body;
-    console.log("Received Data:", req.body);
-    if (!eventName) {
-        return res.status(400).send("Error: eventName is required");
+app.get('/createEventPage',isAuthenticated,isHavePriv(2),(req,res)=>
+{
+    res.render("test", {
+        title: 'test',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    } );
+})
+
+app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, res) => {
+    const userid = req.user.id;
+    const { eventName, timestamp, roomid: eventRoom, description } = req.body;
+
+    if (!eventName || !description || !timestamp) {
+        return res.status(400).send("eventName, description ve timestamp zorunludur");
     }
 
-    let query = "INSERT INTO `eventapp`.`events` (`events_Name`, `approved`, `events_Date`, `events_Time`, `organizer_ID`, `events_Room_ID`) VALUES (?, ?, ?, ?, ?, ?)";
-    con.query(query, [eventName, null, eventDate, eventTime, userid, eventRoom], (err, result) => {
+    const ts = new Date(timestamp);
+    if (isNaN(ts)) {
+        return res.status(400).send("timestamp formatı hatalı. format: YYYY-MM-DD HH:MM:SS");
+    }
+
+    const insertEventQuery = `
+        INSERT INTO eventapp.events (organizer_ID, events_Room_ID)
+        VALUES (?, ?)
+    `;
+
+    con.query(insertEventQuery, [userid, eventRoom], (err, result) => {
         if (err) {
-            return res.status(500).send("Failed to Insert Event: " + err.message);
+            return res.status(500).send("events tablosuna eklenemedi: " + err.message);
         }
-        res.send({ message: "Event Created", eventID: result.insertId });
+
+        const eventID = result.insertId;
+
+        const insertDetailsQuery = `
+            INSERT INTO eventapp.events_details (events_ID, eventName, eventDescription, eventDate)
+            VALUES (?, ?, ?, ?)
+        `;
+
+        con.query(insertDetailsQuery, [eventID, eventName, description, timestamp], (err2) => {
+            if (err2) {
+                return res.status(500).send("event_details tablosuna eklenemedi: " + err2.message);
+            }
+
+            if (req.files && req.files.length > 0) {
+                const eventFolder = path.join(__dirname, 'public', 'uploads', String(eventID));
+
+                // Create the event folder if it doesn't exist
+                if (!fs.existsSync(eventFolder)) {
+                    fs.mkdirSync(eventFolder, { recursive: true });
+                }
+
+                // Process and move all uploaded files to the event-specific folder
+                let imagePaths = [];
+                let promises = [];
+
+                req.files.forEach((file,index) => {
+                    promises.push(new Promise((resolve, reject) => {
+                        const oldPath = file.path;
+                        const ext = path.extname(file.originalname);
+                        const newFileName = `${index}` + ext; // Make unique file name using index
+                        const newPath = path.join(eventFolder, newFileName);
+
+                        // Move the file to the event folder
+                        fs.rename(oldPath, newPath, (err3) => {
+                            if (err3) {
+                                return reject("Resim taşınamadı: " + err3.message);
+                            }
+
+                            // Collect image paths for response
+                            imagePaths.push(`/uploads/${eventID}/${newFileName}`);
+                            resolve();
+                        });
+                    }));
+                });
+
+                // Wait for all file processing to complete
+                Promise.all(promises)
+                    .then(() => {
+                        res.send({
+                            message: "Etkinlik ve görseller başarıyla oluşturuldu",
+                            eventID,
+                            imagePaths: imagePaths
+                        });
+                    })
+                    .catch((err3) => {
+                        res.status(500).send(err3);
+                    });
+
+            } else {
+                res.send({
+                    message: "Etkinlik başarıyla oluşturuldu (görsel yok)",
+                    eventID
+                });
+            }
+        });
     });
 });
 
 
-app.post('/getEvents',isAuthenticated, isHavePriv(1), (req,res)=>
+
+
+app.get('/getEventsForAdmin',isAuthenticated,isHavePriv(3),(req,res)=>// get list of events for approving 
 {
-    let query =`select events_Name, events_Date,events_Time,users.user_Name, rooms.rooms_Name from events join users on events.organizer_ID = users.user_ID join rooms on events.events_Room_ID = rooms.rooms_ID where approved = 1 order by events_Date,events_Time;`;
+    let query = `select events.events_ID, eventName,eventDate,approved, rooms_Name from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID ORDER BY approved;`;
+    con.query(query,(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to get Events " + err.message);
+        }
+        if(result.length > 0)
+        {
+            res.json(result);
+        }
+        else{
+            res.status(404).json({error: "No Events Found"});
+        }
+    })
+
+});
+
+app.get('/getEventDetailsForAdmin',isAuthenticated,isHavePriv(3),(req,res)=> // To get the details for event for admin to approve or reject
+{
+    let events_ID = req.query.events_ID;
+
+    let query = 'select events.events_ID, events.approved, users.user_Name,rooms.rooms_Name, events_details.eventName,events_details.eventDescription, events_details.eventDate from events join events_details on events.events_ID = events_details.events_ID join users on events.organizer_ID = users.user_ID join rooms on events.events_Room_ID= rooms.rooms_ID where events.events_ID = ?;';
+    con.query(query,[events_ID],(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to Get Event Details: " + err.message);
+        }
+        if(result.length > 0)
+        {
+            const eventFolder = path.join(__dirname, 'public', 'uploads', String(events_ID));
+            fs.readdir(eventFolder, (fsErr, files) => {
+                if (fsErr) {
+                    // Klasör yoksa resim yok kabul edilir
+                    return res.json({ ...result[0], images: [] });
+                }
+        
+                const imagePaths = files.map(file => `/uploads/${events_ID}/${file}`);
+                return res.json({ ...result[0], images: imagePaths });
+            });
+        }
+        else{
+            res.status(404).json({error: "Invalid event ID"})
+        }
+
+    });
+});
+
+
+app.post('/sendAnswerForAdmin',(req,res)=>// Send answer for admin to reject approve
+{
+    let answer = req.body.answer; // send 1 or 0 
+    let events_ID = req.body.events_ID;
+    let query = "UPDATE `eventapp`.`events` SET `approved` = ? WHERE (`events_ID` = ?);";
+    con.query(query,[answer,events_ID],(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to set answer: " + err.message);
+        }
+        res.status(200).json({ message: 'Event Updated Successfully' });
+    });
+});
+
+
+app.get('/getEvents',isAuthenticated, isHavePriv(1), (req,res)=>
+{
+    let query = `select events.events_ID, eventName,eventDate,approved, rooms_Name from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where approved = 1 order by events_details.eventDate;`;
     con.query(query,(err,result)=>
     {        
         if (err) {
@@ -220,7 +402,6 @@ app.post('/getEvents',isAuthenticated, isHavePriv(1), (req,res)=>
         } else {
             return res.status(500).send("Cannot get data");
         }
-
     });
 });
 
@@ -243,7 +424,6 @@ app.get("/login", (req,res)=>
     res.render("login", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
-        theme: req.cookies.theme,
         username: req.user ? req.user.username : null
     } );
 });
@@ -264,17 +444,14 @@ app.get("/login/check", (req, res) => {
        
         if (results.length === 1) {
             let sqlStoredHashedPassword = results[0].user_Password; // we have already get the password with the first query so we are just checking it here
-            console.log(sqlStoredHashedPassword, hashedPassword);
             if (sqlStoredHashedPassword === hashedPassword) {
-                const token = jwt.sign({ username: person.username, id: results[0].userID }, JWT_SECRET, { expiresIn: '30d' });// creates token 
+                const token = jwt.sign({ username: person.username, id: results[0].user_ID }, JWT_SECRET, { expiresIn: '30d' });// creates token
                 res.cookie('token', token, { httpOnly: true }); //stores that token in cookie
                 res.redirect("/profile");
             } else {//Wrong password
-                console.log('Wrong PAss')
                 res.redirect("/login");
             }
         } else {//Wrong username
-            console.log('wronusername');
             res.redirect("/login");
         }
     });
@@ -287,7 +464,6 @@ app.get("/signup", (req,res)=>
         res.render("signup", {
             title: 'Kayıt Ol',
             loggedin: !!req.cookies.token,
-            theme: req.cookies.theme,
             username: req.user ? req.user.username : null
         });
     });
