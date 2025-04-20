@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Etkinlik Detay</title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <%- include('partials/nav') %>
+
+        <div class="container mt-5">
+            <div id="event-container" class="card shadow-sm p-4">
+                <h3 id="event-name">Yükleniyor...</h3>
+                <p><strong>Tarih:</strong> <span id="event-date"></span></p>
+                <p><strong>Açıklama:</strong> <span id="event-desc"></span></p>
+                <p><strong>Salon:</strong> <span id="event-room"></span></p>
+
+                <div id="event-images" class="row mt-4"></div>
+
+            </div>
+        </div>
+
+        <%- include('partials/footer') %>
+
+        <script>
+            document.addEventListener("DOMContentLoaded", () => {
+                const params = new URLSearchParams(window.location.search);
+                const eventId = params.get('eventID');
+                const container = document.getElementById("event-container");
+            
+                if (!eventId) {
+                    container.innerHTML = "<p>Etkinlik ID bulunamadı.</p>";
+                    return;
+                }
+            
+                fetch(`/getEventDetails?event_ID=${eventId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.err) {
+                            container.innerHTML = `<p>${data.err}</p>`;
+                            return;
+                        }
+            
+                        document.getElementById("event-name").innerText = data.eventName;
+                        document.getElementById("event-date").innerText = data.eventDate;
+                        document.getElementById("event-desc").innerText = data.eventDescription;
+                        document.getElementById("event-room").innerText = data.rooms_Name;
+            
+                        const imageContainer = document.getElementById("event-images");
+                        if (data.imagePaths && data.imagePaths.length > 0) {
+                            data.imagePaths.forEach(path => {
+                                const col = document.createElement("div");
+                                col.className = "col-md-4 mb-3";
+                                col.innerHTML = `<img src="/${path}" class="img-fluid rounded shadow-sm">`;
+                                imageContainer.appendChild(col);
+                            });
+                        }
+            
+            
+                        // Onay / Reddet Butonları
+                        const approveBtn = document.createElement("button");
+                        approveBtn.className = "btn btn-primary me-2";
+                        approveBtn.innerText = "Onayla";
+                        approveBtn.onclick = () => sendAnswer(1);
+            
+                        const rejectBtn = document.createElement("button");
+                        rejectBtn.className = "btn btn-danger";
+                        rejectBtn.innerText = "Reddet";
+                        rejectBtn.onclick = () => sendAnswer(0);
+            
+                        container.appendChild(document.createElement("hr"));
+                        container.appendChild(approveBtn);
+                        container.appendChild(rejectBtn);
+                    })
+                    .catch(err => {
+                        container.innerHTML = `<p>Veri alınırken hata oluştu: ${err}</p>`;
+                    });
+            
+                function sendAnswer(answer) {
+                    fetch('/sendAnswerForAdmin', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            answer: answer,
+                            events_ID: eventId
+                        })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        alert(data.message || "Durum güncellendi.");
+                        window.location.href = "/etkinlikOnayPaneli"; // yönlendirme
+                    })
+                    .catch(err => {
+                        alert("Bir hata oluştu: " + err.message);
+                    });
+                }
+            });
+            </script>
+            
+
+</body>
+
+</html>

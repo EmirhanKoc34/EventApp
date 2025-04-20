@@ -1,68 +1,100 @@
 <!DOCTYPE html>
 <html lang="tr">
 <head>
+  <%- include('partials/nav', { title: 'Giriş' }) %>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Etkinlik Onay Paneli</title>
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
-<body class="bg-light py-5">
+<body class="d-flex flex-column min-vh-100">
 
   <div class="container">
-    <h1 class="text-center mb-5 fw-bold">🛠️ Etkinlik Onay Paneli</h1>
+    <h1 class="text-center mb-5 fw-bold">Etkinlik Onay Paneli</h1>
 
     <div id="etkinlik-listesi" class="row gy-4">
       <!-- Etkinlikler burada dinamik olarak eklenecek -->
     </div>
+    <div class="mb-5"></div>
   </div>
 
-  <script>
-    // Etkinlik verilerini saklayan dizi
-    const etkinlikler = [
-      {
-        baslik: "🎉 Yaz Festivali",
-        tarih: "15 Haziran 2025, 18:00",
-        yer: "İzmir Sahil",
-        link: "file:///C:/Users/demir/Downloads/etkinlik_yaz-festivali.html"
-      },
-      {
-        baslik: "🎭 Tiyatro Gecesi",
-        tarih: "20 Haziran 2025, 20:00",
-        yer: "Ankara Kültür Merkezi",
-        link: "file:///C:/Users/demir/Downloads/tiyatro-gecesi.html"
-      }
-    ];
 
-    // Etkinlikleri sayfada görüntülemek için bir fonksiyon
-    function etkinlikleriGoster() {
+  <script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+    window.onload = function () {
+      fetch('/getEventsForAdmin')
+        .then(response => response.json())
+        .then(data => {
+          if (Array.isArray(data)) {
+            etkinlikleriGoster(data);
+          } else {
+            console.warn("Etkinlik verisi beklenilen formatta değil:", data);
+          }
+        })
+        .catch(error => {
+          console.error("Etkinlik verileri alınamadı:", error);
+        });
+    }
+  
+    function etkinlikleriGoster(etkinlikler) {
       const listContainer = document.getElementById('etkinlik-listesi');
       listContainer.innerHTML = ''; // Önceki içerikleri temizle
-
+  
       etkinlikler.forEach(etkinlik => {
         const etkinlikCol = document.createElement('div');
         etkinlikCol.classList.add('col-md-6');
-
+  
         const card = document.createElement('div');
         card.classList.add('card', 'shadow-sm', 'h-100');
+  
+        const link = `/etkinlikOnayPaneli/details?eventID=${etkinlik.events_ID}`;
 
+        let durum = etkinlik.approved;
+        let durumBadge = '';
+        let durumText = '';
+
+        if (durum === null) {
+          durumBadge = 'bg-warning text-dark';
+          durumText = 'Bekliyor';
+        } else if (durum === 0) {
+          durumBadge = 'bg-danger';
+          durumText = 'Reddedildi';
+        } else if (durum === 1) {
+          durumBadge = 'bg-success';
+          durumText = 'Onaylandı';
+        }
+  
         card.innerHTML = `
-          <a href="${etkinlik.link}" class="text-decoration-none text-dark">
-            <div class="card-body">
-              <h5 class="card-title">${etkinlik.baslik}</h5>
-              <p class="card-text"><small>${etkinlik.tarih} - ${etkinlik.yer}</small></p>
-            </div>
-          </a>
-        `;
-
+        <a href="${link}" class="text-decoration-none text-dark">
+          <div class="card-body">
+            <h5 class="card-title">${etkinlik.eventName}</h5>
+            <p class="card-text"><small>${formatTarih(etkinlik.eventDate)} - ${etkinlik.rooms_Name}</small></p>
+            <span class="badge ${durumBadge}">
+              ${durumText}
+            </span>
+          </div>
+        </a>
+      `;
         etkinlikCol.appendChild(card);
         listContainer.appendChild(etkinlikCol);
       });
     }
-
-    // Sayfa yüklendiğinde etkinlikleri göster
-    window.onload = etkinlikleriGoster;
+  
+    function formatTarih(dateStr) {
+      const tarih = new Date(dateStr);
+      return tarih.toLocaleDateString('tr-TR', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    }
   </script>
+  
+  
 
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+  <%- include('partials/footer', { title: 'Giriş' }) %>
 </body>
 </html>

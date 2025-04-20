@@ -468,6 +468,25 @@ app.post('/update-lang', (req, res) => {
 });
 
 
+app.get('/etkinlikOnayPaneli',(req,res)=>
+{
+    res.render("EtkinlikOnayPaneli", {
+        title: 'Etkinlik Onay Paneli',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    });
+});
+
+app.get('/etkinlikOnayPaneli/details',(req,res)=>
+{
+    res.render("etkinlikOnayPaneliDetay",
+        {
+            title: 'Etkinlik Onay Paneli',
+            loggedin: !!req.cookies.token,
+            username: req.user ? req.user.username : null
+        });
+
+});
 
 app.get('/etkinlikDetay', (req, res) => {
     res.render("etkinlik-detay", {
