@@ -9,6 +9,8 @@ const i18n = require('i18n');
 const multer = require('multer');
 const fs = require('fs');
 
+app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap')));
+
 // Set up Multer storage engine (optional, for custom file naming and storage locations)
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -168,22 +170,6 @@ app.use((req, res, next) => {
     next();
 });
 
-app.get("/anasayfa", (req,res) => {
-    res.render("main", {
-        title: 'Anasayfa',
-        loggedin: !!req.cookies.token,
-        username: req.user ? req.user.username : null,
-    });
-});
-
-app.get("/settings", (req,res) => {
-    res.render("settings", {
-        title: 'Anasayfa',
-        loggedin: !!req.cookies.token,
-        username: req.user ? req.user.username : null,
-        lang: req.cookies.locale
-    });
-});
 
 app.get('/logout', (req, res) => {
     res.clearCookie('token');
@@ -194,33 +180,6 @@ app.get('/', (req, res) => {
     res.redirect('/anasayfa');
 });
 
-
-app.get("/profile",isAuthenticated, isHavePriv(1), (req,res) => {
-    res.render("profile",{
-        title: 'Profile',
-        loggedin: !!req.cookies.token,
-        username: req.user ? req.user.username : null,
-    });
-});
-
-app.post('/getProfileData', (req, res) => {
-    const { username }  = req.body;
-    
-    const query = `SELECT * from users WHERE BINARY user_Name = ?;`;
-    const values = [username];
-    
-    con.query(query, values, (err, result) => {
-        if (err) {
-            return res.status(500).send("Failed Get User Data");
-        } 
-        if (result.length > 0) {
-            res.send(result);
-        } else {
-            return res.status(500).send("Cannot get data");
-        }
-        
-    });
-});
 
 app.get('/createEventPage',isAuthenticated,isHavePriv(2),(req,res)=>
 {
@@ -440,12 +399,10 @@ app.get('/getEventDetails', isAuthenticated, isHavePriv(1), (req, res) => {
             let imagePaths = [];
 
             try {
-                // Check if directory exists
                 if (fs.existsSync(imageDir)) {
                     for (let i = 0; i <= 5; i++) {
                         let imgPath = path.join(imageDir, `${i}.png`);
                         if (fs.existsSync(imgPath)) {
-                            // send relative path for frontend usage
                             imagePaths.push(`uploads/${event_ID}/${i}.png`);
                         }
                     }
@@ -476,6 +433,43 @@ app.post('/update-lang', (req, res) => {
 
 });
 
+
+
+app.get('/galeri', (req, res) => {
+    res.render("galeri", {
+        title: 'Giriş',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    });
+});
+
+app.get('/hakkimizda', (req, res) => {
+    res.render("hakkimizda", {
+        title: 'Giriş',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    });
+});
+
+
+app.get('/anasayfa',(req,res)=>
+    {
+        res.render("index", {
+            title: 'Anasayfa',
+            loggedin: !!req.cookies.token,
+            username: req.user ? req.user.username : null
+        });
+    });
+
+
+app.get('/panel',(req,res)=>
+{
+    res.render("panel", {
+        title: 'Giriş',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    });
+});
 
 app.get("/login", (req,res)=>
 {

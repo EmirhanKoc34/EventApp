@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Hakkımızda</title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .hero {
+            background-color: #343a40;
+            color: white;
+            padding: 80px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+        }
+
+        .hero p {
+            font-size: 1.1rem;
+        }
+
+        .icerik {
+            padding: 60px 15px;
+        }
+
+        .icerik p {
+            font-size: 1.05rem;
+            line-height: 1.8;
+            color: #333;
+            max-width: 900px;
+            margin: 0 auto 20px;
+        }
+    </style>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+    <%- include('partials/nav') %>
+
+        <!-- Üst Başlık Alanı -->
+        <section class="hero">
+            <div class="container">
+                <h1>Hakkımızda</h1>
+                <p>Şirketimizin temel değerleri ve vizyonu hakkında bilgi edinin.</p>
+            </div>
+        </section>
+
+        <!-- Metin İçeriği -->
+        <section class="icerik">
+            <div class="container">
+                <p>
+                    Kuruluşumuzdan bu yana, yenilikçi ve çözüm odaklı yaklaşımımızla
+                    sektörümüzde değer yaratmayı hedefliyoruz. Müşteri memnuniyetini ön planda tutarak,
+                    güvenilir hizmet anlayışıyla çalışmalarımızı sürdürüyoruz.
+                </p>
+                <p>
+                    Her geçen gün gelişen ve değişen dünyaya ayak uydurmak adına,
+                    teknolojiyi ve insan odaklı çözümleri merkezimize alıyoruz. Şeffaflık, kalite ve sürdürülebilirlik
+                    ilkeleri doğrultusunda daha iyi bir gelecek için çalışıyoruz.
+                </p>
+            </div>
+        </section>
+
+        <%- include('partials/footer') %>
+            <script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
