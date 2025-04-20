@@ -8,6 +8,7 @@ var cookieParser = require('cookie-parser');
 const i18n = require('i18n');
 const multer = require('multer');
 const fs = require('fs');
+const { eventNames } = require('process');
 
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap')));
 
@@ -419,6 +420,39 @@ app.get('/getEventDetails', isAuthenticated, isHavePriv(1), (req, res) => {
     });
 });
 
+app.post('/getSeats',isAuthenticated,isHavePriv(1),(req,res)=>
+{
+    let event_ID = req.body.event_ID;
+    let query = 'select seats_ID from rooms join seats on seats_Room_ID = rooms.rooms_ID join events on events.events_Room_ID = rooms.rooms_ID  where events_ID = ?;';
+    con.query(query,[event_ID],(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed Get Seats Data");
+        }
+        if (result.length > 0) {
+            res.json(result);
+        }
+    })
+
+});
+
+app.post('/sendTicket',isAuthenticated,isHavePriv(1),(req,res)=>
+{
+    let seatID = req.body.seatID;
+    let eventID = req.body.eventID;
+    let userId = req.user.id;
+
+    let query= "INSERT INTO `eventapp`.`tickets` (`tickets_Event_ID`, `tickets_User_ID`, `tickets_Seat_ID`) VALUES (?, ?, ?);";
+    con.query(query,[eventID,userId,seatID],(err,result)=>
+    {     
+        if (err) {
+            return res.status(500).send("Failed to insert into tickets");
+        }  
+        res.status(200).json({message: "Successful"});
+
+    });
+});
+
 
 app.post('/update-lang', (req, res) => {
     const lang = req.body.lang;
@@ -431,6 +465,16 @@ app.post('/update-lang', (req, res) => {
         res.status(400).send("Error updating lang");
     }
 
+});
+
+
+
+app.get('/etkinlikDetay', (req, res) => {
+    res.render("etkinlik-detay", {
+        title: 'Giriş',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    });
 });
 
 
