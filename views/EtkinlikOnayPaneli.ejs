@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Etkinlik Onay Paneli</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen p-6">
+  <div class="max-w-4xl mx-auto">
+    <h1 class="text-3xl font-bold text-center text-gray-800 mb-8">🛠️ Etkinlik Onay Paneli</h1>
+
+    <div id="etkinlik-listesi" class="space-y-4">
+      <!-- Etkinlikler burada dinamik olarak eklenecek -->
+    </div>
+  </div>
+
+  <script>
+    // Etkinlik verilerini saklayan dizi
+    const etkinlikler = [
+      {
+        baslik: "🎉 Yaz Festivali",
+        tarih: "15 Haziran 2025, 18:00",
+        yer: "İzmir Sahil",
+        link: "file:///C:/Users/demir/Downloads/etkinlik_yaz-festivali.html"
+      },
+      {
+        baslik: "🎭 Tiyatro Gecesi",
+        tarih: "20 Haziran 2025, 20:00",
+        yer: "Ankara Kültür Merkezi",
+        link: "file:///C:/Users/demir/Downloads/tiyatro-gecesi.html"
+      }
+    ];
+
+    // Etkinlikleri sayfada görüntülemek için bir fonksiyon
+    function etkinlikleriGoster() {
+      const listContainer = document.getElementById('etkinlik-listesi');
+      listContainer.innerHTML = ''; // Önceki içerikleri temizle
+
+      etkinlikler.forEach(etkinlik => {
+        const etkinlikDiv = document.createElement('div');
+        etkinlikDiv.classList.add('bg-white', 'shadow-md', 'rounded-xl', 'overflow-hidden', 'hover:bg-gray-100', 'transition');
+        
+        etkinlikDiv.innerHTML = `
+          <a href="${etkinlik.link}" class="block p-4">
+            <h2 class="text-xl font-semibold text-gray-800">${etkinlik.baslik}</h2>
+            <p class="text-gray-600 text-sm">${etkinlik.tarih} - ${etkinlik.yer}</p>
+          </a>
+        `;
+        
+        listContainer.appendChild(etkinlikDiv);
+      });
+    }
+
+    // Sayfa yüklendiğinde etkinlikleri göster
+    window.onload = etkinlikleriGoster;
+  </script>
+</body>
+</html>
