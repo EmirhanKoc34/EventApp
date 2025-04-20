@@ -1,69 +1,92 @@
 <!DOCTYPE html>
 <html lang="tr">
+
 <head>
-    <%- include('partials/nav', { title: 'Giriş' }) %>
+  <%- include('partials/nav', { title: 'Giriş' }) %>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
+    <style>
+      body {
+        background-color: #f8f9fa;
+      }
 
+      .login-container {
+        max-width: 400px;
+        margin: 80px auto;
+        padding: 30px;
+        background-color: white;
+        border-radius: 12px;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+      }
+
+      .login-container h1 {
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .error {
+        color: red;
+        font-size: 0.9rem;
+        text-align: center;
+      }
+    </style>
 </head>
+
 <body>
-    <div class="login-form">
-        <form action="/login/check"  id="form" method="get">
-          <h1>Giriş Yap</h1>
-          
-          <div class="content">
-            
-            <div class="input-field">
-              <input type="name" id="username" name="username" placeholder="KULLANICI ADI*" autocomplete="nickname" oninput="this.value = this.value.replace(/\s/g, ''); this.value = this.value.slice(0, 45);" required>
-            </div>
-            <div class="input-field">
-              <input type="password" id="password" name="password" placeholder="ŞİFRE*" autocomplete="password"  oninput="this.value = this.value.replace(/\s/g, '');"  required>
-            </div>
-            
-          </div>
-          
-          
-        </form>
 
-        <p id="empty" class="error" >Gerekli Alanları Doldularmlısınız*</p>
-        
-        <div class="action" style="width: 50%; margin: 0 auto;" >
-            
-          <button type="submit" onclick="inputCheck()">Giriş</button>
-          <button class="signupbutton" onclick="signup()">Kayıt Ol</button>
+  <div class="container">
+    <div class="login-container">
+      <form action="/login/check" id="form" method="get">
+        <h1>Giriş Yap</h1>
+
+        <div class="mb-3">
+          <input type="name" id="username" name="username" class="form-control" placeholder="Kullanıcı Adı"
+            autocomplete="nickname"
+            oninput="this.value = this.value.replace(/\s/g, ''); this.value = this.value.slice(0, 45);" required>
         </div>
-        
-      </div>
-    
-</body>
-<script>
-  document.getElementById("empty").style.display = "none";
-    function entersubmit(event) { 
-            if (event.key === "Enter") {
-                inputCheck();
-            }
-        } 
-    document.addEventListener("keydown", entersubmit);//when enter clicked in login page it submits form
 
-    function inputCheck()
-    {
+        <div class="mb-3">
+          <input type="password" id="password" name="password" class="form-control" placeholder="Şifre"
+            autocomplete="password" oninput="this.value = this.value.replace(/\s/g, '');" required>
+        </div>
+
+        <p id="empty" class="error">Gerekli Alanları Doldurmalısınız*</p>
+
+        <div class="d-grid gap-2">
+          <button type="submit" onclick="inputCheck()" class="btn btn-primary">Giriş</button>
+          <button type="button" onclick="signup()" class="btn btn-outline-secondary">Kayıt Ol</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    document.getElementById("empty").style.display = "none";
+
+    function entersubmit(event) {
+      if (event.key === "Enter") {
+        inputCheck();
+      }
+    }
+
+    document.addEventListener("keydown", entersubmit);
+
+    function inputCheck() {
       document.getElementById("empty").style.display = "none";
       let pass = document.getElementById("password").value;
       let user = document.getElementById("username").value;
-      if(pass === "" || user === "")
-      {
+      if (pass === "" || user === "") {
         document.getElementById("empty").style.display = "block";
-      }
-      else{
+      } else {
         document.getElementById("form").submit();
       }
-    } 
+    }
 
+    function signup() {
+      window.location.href = "/signup";
+    }
+  </script>
+</body>
 
-    function signup()
-    {
-        window.location.href = "/signup";
-    } 
-</script>
 </html>
