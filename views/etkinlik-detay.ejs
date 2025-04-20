@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Etkinlik Detay</title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+
+    <%- include('partials/nav') %>
+
+        <div class="container mt-5">
+            <div id="event-container" class="card shadow-sm p-4">
+                <h3 id="event-name">Yükleniyor...</h3>
+                <p><strong>Tarih:</strong> <span id="event-date"></span></p>
+                <p><strong>Açıklama:</strong> <span id="event-desc"></span></p>
+                <p><strong>Salon:</strong> <span id="event-room"></span></p>
+
+                <div id="event-images" class="row mt-4"></div>
+
+                <a id="ticket-link" href="#" class="btn btn-success mt-3">Bilet Al</a>
+            </div>
+        </div>
+
+        <%- include('partials/footer') %>
+
+            <script>
+                // Etkinlik ID’yi URL'den al
+                const urlParams = new URLSearchParams(window.location.search);
+                const eventId = urlParams.get("event_ID");
+
+                // API'den veriyi çek
+                fetch(`/getEventDetails?event_ID=${eventId}`)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.err) {
+                            document.getElementById('event-container').innerHTML = '<p>Etkinlik bulunamadı.</p>';
+                            return;
+                        }
+
+                        document.getElementById('event-name').innerText = data.eventName;
+                        document.getElementById('event-date').innerText = data.eventDate;
+                        document.getElementById('event-desc').innerText = data.eventDescription;
+                        document.getElementById('event-room').innerText = data.rooms_Name;
+                        document.getElementById('ticket-link').href = `/koltuk-sec/${data.events_ID}`;
+
+                        const imagesDiv = document.getElementById('event-images');
+                        data.imagePaths.forEach(path => {
+                            const img = document.createElement('img');
+                            img.src = `/${path}`;
+                            img.classList.add('col-md-4', 'mb-3', 'img-fluid', 'rounded');
+                            imagesDiv.appendChild(img);
+                        });
+                    })
+                    .catch(err => {
+                        console.error("Hata:", err);
+                        document.getElementById('event-container').innerHTML = '<p>Veri alınamadı.</p>';
+                    });
+            </script>
+
+</body>
+
+</html>
