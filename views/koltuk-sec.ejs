@@ -13,17 +13,16 @@
         }
 
         .seat {
-            width: 50px;
-            height: 50px;
-            font-size: 0.8rem;
+            width: 70px;
+            height: 70px;
+            font-size: 0.9rem;
             font-weight: 500;
-            line-height: 50px;
+            line-height: 70px;
             padding: 0;
             border-radius: 5px;
             border: none;
             color: white;
             margin: 5px;
-            /* 👈 ARAYA BOŞLUK KOYDUK */
         }
 
         .available {
@@ -43,9 +42,7 @@
             display: flex;
             justify-content: center;
             flex-wrap: wrap;
-            /* 👈 küçük ekranda taşıyor gibi olursa alta geçsin */
         }
-
 
         .action-buttons {
             margin-top: 30px;
@@ -56,76 +53,120 @@
 <body class="d-flex flex-column min-vh-100">
     <%- include('partials/nav') %>
 
-        <div class="container text-center">
-            <h2 class="mb-4">Koltuk Seçimi</h2>
+    <div class="container text-center">
+        <h2 class="mb-4">Koltuk Seçimi</h2>
 
-            <form action="/bilet-onayla" method="POST" onsubmit="prepareSeats()">
-                <div id="seat-grid" class="mb-4">
-                    <!-- Koltuklar burada oluşturulacak -->
-                </div>
+        <form id="ticketForm">
+            <div id="seat-grid" class="mb-4">
+                <!-- Koltuklar burada oluşturulacak -->
+            </div>
 
-                <input type="hidden" name="selectedSeats" id="selectedSeats" />
+            <div class="action-buttons">
+                <button type="submit" class="btn btn-success me-2">Onayla</button>
+                <a href="/" class="btn btn-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
 
-                <div class="action-buttons">
-                    <button type="submit" class="btn btn-success me-2">Onayla</button>
-                    <a href="/" class="btn btn-secondary">İptal</a>
-                </div>
-            </form>
-        </div>
+    <script>
+        const seatGrid = document.getElementById("seat-grid");
+        const selected = [];
+        const eventID = new URLSearchParams(window.location.search).get("eventID");
 
-        <script>
-            const rows = 5;
-            const cols = 8;
-            const seatGrid = document.getElementById("seat-grid");
-            const selected = [];
+        if (!eventID) {
+            alert("Etkinlik ID'si belirtilmedi.");
+        }
 
-            const unavailableSeats = ["B3", "B4", "C5", "D1"]; // dolu olanlar örnek
+        async function fetchSeats() {
+            try {
+                const res = await fetch("/getSeats", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ event_ID: eventID })
+                });
 
-            function createGrid() {
-                for (let r = 1; r <= rows; r++) {
-                    const rowDiv = document.createElement("div");
-                    rowDiv.className = "seat-row";
-
-                    for (let c = 1; c <= cols; c++) {
-                        const rowChar = String.fromCharCode(64 + r); // 1 -> A
-                        const seatId = `${rowChar}${c}`;
-
-                        const btn = document.createElement("button");
-                        btn.type = "button";
-                        btn.className = "seat available";
-                        btn.textContent = seatId;
-
-                        if (unavailableSeats.includes(seatId)) {
-                            btn.classList.remove("available");
-                            btn.classList.add("unavailable");
-                        }
-
-                        btn.addEventListener("click", () => {
-                            if (btn.classList.contains("selected")) {
-                                btn.classList.remove("selected");
-                                selected.splice(selected.indexOf(seatId), 1);
-                            } else {
-                                btn.classList.add("selected");
-                                selected.push(seatId);
-                            }
-                        });
-
-                        rowDiv.appendChild(btn);
-                    }
-
-                    seatGrid.appendChild(rowDiv);
+                if (!res.ok) {
+                    return alert("Koltuk verileri alınamadı.");
                 }
+
+                const data = await res.json();
+
+                if (!data.length) {
+                    return seatGrid.innerHTML = "<p>Bu etkinlik için tanımlı koltuk bulunamadı.</p>";
+                }
+
+                createGrid(data.map(x => x.seats_ID));
+            } catch (err) {
+                alert("Bir hata oluştu: " + err.message);
+            }
+        }
+
+        function createGrid(seatIDs) {
+            seatGrid.innerHTML = "";
+
+            const rowDiv = document.createElement("div");
+            rowDiv.className = "seat-row";
+
+            seatIDs.forEach(seatId => {
+                const btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "seat available";
+                btn.textContent = seatId;
+
+                btn.addEventListener("click", () => {
+                    if (btn.classList.contains("selected")) {
+                        btn.classList.remove("selected");
+                        selected.splice(selected.indexOf(seatId), 1);
+                    } else {
+                        btn.classList.add("selected");
+                        selected.push(seatId);
+                    }
+                });
+
+                rowDiv.appendChild(btn);
+            });
+
+            seatGrid.appendChild(rowDiv);
+        }
+
+        async function submitTickets(e) {
+            e.preventDefault();
+
+            if (!selected.length) {
+                return alert("Lütfen en az bir koltuk seçiniz.");
             }
 
-            function prepareSeats() {
-                document.getElementById("selectedSeats").value = JSON.stringify(selected);
+            try {
+                for (const seatID of selected) {
+                    const res = await fetch("/sendTicket", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ seatID, eventID })
+                    });
+
+                    if (!res.ok) {
+                        const errMsg = await res.text();
+                        return alert(`Koltuk ${seatID} için bilet alınamadı. Hata: ${errMsg}`);
+                    }
+                }
+
+                alert("Biletler başarıyla alındı.");
+                window.location.href = "/";
+            } catch (err) {
+                alert("Bir hata oluştu: " + err.message);
             }
+        }
 
-            createGrid();
-        </script>
+        document.getElementById("ticketForm").addEventListener("submit", submitTickets);
 
-        <%- include('partials/footer') %>
+        fetchSeats();
+    </script>
 
+    <%- include('partials/footer') %>
 </body>
 
 </html>

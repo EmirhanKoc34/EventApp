@@ -496,6 +496,15 @@ app.get('/etkinlikDetay', (req, res) => {
     });
 });
 
+app.get('/etkinlikKoltukSec',(req,res)=>
+{
+    res.render("koltuk-sec", {
+        title: 'Giriş',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    });
+});
+
 
 
 app.get('/galeri', (req, res) => {

@@ -44,7 +44,7 @@
                         document.getElementById('event-date').innerText = data.eventDate;
                         document.getElementById('event-desc').innerText = data.eventDescription;
                         document.getElementById('event-room').innerText = data.rooms_Name;
-                        document.getElementById('ticket-link').href = `/koltuk-sec/${data.events_ID}`;
+                        document.getElementById('ticket-link').href = `/etkinlikKoltukSec?eventID=${data.events_ID}`;
 
                         const imagesDiv = document.getElementById('event-images');
                         data.imagePaths.forEach(path => {

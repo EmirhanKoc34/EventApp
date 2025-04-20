@@ -24,28 +24,62 @@
                         <th class="text-center">İşlem</th>
                     </tr>
                 </thead>
-                <tbody>
-                    <% etkinlikler.forEach(e=> { %>
-                        <tr>
-                            <td>
-                                <%= e.title %>
-                            </td>
-                            <td>
-                                <%= e.date %>
-                            </td>
-                            <td class="text-center">
-                                <a href="/koltuk-sec/<%= e.id %>" class="btn btn-success btn-sm">Bilet Al</a>
-                            </td>
-                        </tr>
-                        <% }) %>
-
-
-                </tbody>
             </table>
         </div>
 
         <%- include('partials/footer') %>
 
+        <script>
+            document.addEventListener("DOMContentLoaded", async () => {
+                try {
+                    const response = await fetch("/getEvents");
+                    if (!response.ok) {
+                        return alert("Etkinlik verileri alınamadı.");
+                    }
+        
+                    const events = await response.json();
+                    const table = document.querySelector("table");
+        
+                    events.forEach(event => {
+                        const tr = document.createElement("tr");
+        
+                        const tdName = document.createElement("td");
+                        tdName.textContent = event.eventName;
+        
+                        const tdDate = document.createElement("td");
+                        const formattedDate = new Date(event.eventDate).toLocaleDateString("tr-TR", {
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric'
+                        });
+                        tdDate.textContent = formattedDate;
+        
+                        const tdAction = document.createElement("td");
+                        tdAction.className = "text-center";
+        
+                        const button = document.createElement("a");
+                        button.href = `/etkinlikDetay?event_ID=${event.events_ID}`;
+                        button.className = "btn btn-primary";
+                        button.textContent = "Detayları Görüntüle / Bilet Al";
+        
+                        tdAction.appendChild(button);
+                        tr.appendChild(tdName);
+                        tr.appendChild(tdDate);
+                        tr.appendChild(tdAction);
+        
+                        table.querySelector("tbody")?.appendChild(tr) || (() => {
+                            const tbody = document.createElement("tbody");
+                            tbody.appendChild(tr);
+                            table.appendChild(tbody);
+                        })();
+                    });
+                } catch (err) {
+                    console.error("Hata:", err);
+                    alert("Etkinlikler yüklenirken bir hata oluştu.");
+                }
+            });
+        </script>
+        
 </body>
 
 </html>
