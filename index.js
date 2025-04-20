@@ -231,6 +231,11 @@ app.get('/createEventPage',isAuthenticated,isHavePriv(2),(req,res)=>
     } );
 })
 
+app.get('/getRoomsForCreate',isAuthenticated,isHavePriv(2),(req,res)=>
+{
+
+});
+
 app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, res) => {
     const userid = req.user.id;
     const { eventName, timestamp, roomid: eventRoom, description } = req.body;
@@ -404,6 +409,59 @@ app.get('/getEvents',isAuthenticated, isHavePriv(1), (req,res)=>
         }
     });
 });
+
+
+app.get('/getEventDetails', isAuthenticated, isHavePriv(1), (req, res) => {
+    let event_ID = req.query.event_ID;
+
+    let query = `
+        SELECT 
+            events.events_ID, 
+            rooms.rooms_Name, 
+            eventName, 
+            eventDescription, 
+            eventDate  
+        FROM 
+            events 
+        JOIN events_details ON events.events_ID = events_details.events_ID 
+        JOIN users ON events.organizer_ID = users.user_ID 
+        JOIN rooms ON rooms.rooms_ID = events.events_Room_ID 
+        WHERE 
+            events.events_ID = ?;
+    `;
+
+    con.query(query, [event_ID], (err, result) => {
+        if (err) {
+            return res.status(500).send("Failed Get Events Data");
+        }
+        if (result.length > 0) {
+            let event = result[0];
+            let imageDir = path.join(__dirname, 'public/uploads', String(event_ID));
+            let imagePaths = [];
+
+            try {
+                // Check if directory exists
+                if (fs.existsSync(imageDir)) {
+                    for (let i = 0; i <= 5; i++) {
+                        let imgPath = path.join(imageDir, `${i}.png`);
+                        if (fs.existsSync(imgPath)) {
+                            // send relative path for frontend usage
+                            imagePaths.push(`uploads/${event_ID}/${i}.png`);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error("Error checking image files", e);
+            }
+
+            event.imagePaths = imagePaths;
+            res.json(event);
+        } else {
+            res.json({ err: "No Data Found" });
+        }
+    });
+});
+
 
 app.post('/update-lang', (req, res) => {
     const lang = req.body.lang;
