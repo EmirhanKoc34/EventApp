@@ -1,3 +1,4 @@
+<meta charset="UTF-8">
 <nav class="navbar navbar-expand-lg custom-navbar" data-bs-theme="light">
     <div class="container">
         <div class="row w-100 align-items-center">
@@ -5,10 +6,14 @@
             <div class="col d-flex justify-content-start">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/galeri"><%= __('gallery') %></a>
+                        <a class="nav-link" href="/galeri">
+                            <%= __('gallery') %>
+                        </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/hakkimizda"><%= __('about') %></a>
+                        <a class="nav-link" href="/hakkimizda">
+                            <%= __('about') %>
+                        </a>
                     </li>
                 </ul>
             </div>
@@ -24,13 +29,19 @@
             <div class="col d-flex justify-content-end align-items-center">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/panel"><%= __('events') %></a>
+                        <a class="nav-link" href="/panel">
+                            <%= __('events') %>
+                        </a>
                     </li>
                     <li class="nav-item" id="etkinlikOnayPaneli">
-                        <a class="nav-link" href="/etkinlikOnayPaneli"><%= __('eventsconfirmpage') %></a>
+                        <a class="nav-link" href="/etkinlikOnayPaneli">
+                            <%= __('eventsconfirmpage') %>
+                        </a>
                     </li>
                     <li class="nav-item" id="etkinlikOlustur">
-                        <a class="nav-link" href="/etkinlik-olustur"><%= __('createevent') %></a>
+                        <a class="nav-link" href="/etkinlik-olustur">
+                            <%= __('createevent') %>
+                        </a>
                     </li>
                 </ul>
 
@@ -39,22 +50,27 @@
                     <span class="ms-3">
                         <%= username %>
                     </span>
-                    <a href="/logout" class="btn btn-dark ms-3"><%= __('logout') %></a>
+                    <a href="/logout" class="btn btn-dark ms-3">
+                        <%= __('logout') %>
+                    </a>
                     <% } else { %>
-                        <a href="/login" class="btn btn-dark ms-3"><%= __('login') %></a>
+                        <a href="/login" class="btn btn-dark ms-3">
+                            <%= __('login') %>
+                        </a>
                         <% } %>
 
                             <!-- Dil Menüsü -->
                             <div class="ms-3 position-relative" id="langDropdown">
-                                <button onclick="toggleLangMenu()" class="btn btn-outline-secondary">🌐 <%= __('lang') %></button>
+                                <button onclick="toggleLangMenu()" class="btn btn-outline-secondary">🌐 <%= __('lang')
+                                        %></button>
                                 <div id="langOptions" class="position-absolute bg-white border rounded mt-1 p-2 shadow"
                                     style="display:none; right:0; min-width:120px; z-index:999;">
                                     <div>
                                         <a href="#" onclick="setLang('tr')"
-                                            class="d-block py-1 px-2 <%= lang === 'tr' ? 'fw-bold text-primary' : '' %>">🇹🇷
+                                            class="d-block py-1 px-2 <%= lang === 'tr' ? 'fw-bold text-primary' : '' %>">
                                             Türkçe</a>
                                         <a href="#" onclick="setLang('en')"
-                                            class="d-block py-1 px-2 <%= lang === 'en' ? 'fw-bold text-primary' : '' %>">🇬🇧
+                                            class="d-block py-1 px-2 <%= lang === 'en' ? 'fw-bold text-primary' : '' %>">
                                             English</a>
                                     </div>
                                 </div>
