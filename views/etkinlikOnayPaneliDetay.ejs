@@ -7,102 +7,110 @@
     <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
 </head>
 
-<body class="d-flex flex-column min-vh-100">
+<body class="d-flex flex-column min-vh-100 bg-light">
 
     <%- include('partials/nav') %>
 
         <div class="container mt-5">
-            <div id="event-container" class="card shadow-sm p-4">
-                <h3 id="event-name">Yükleniyor...</h3>
-                <p><strong>Tarih:</strong> <span id="event-date"></span></p>
-                <p><strong>Açıklama:</strong> <span id="event-desc"></span></p>
-                <p><strong>Salon:</strong> <span id="event-room"></span></p>
+            <div id="event-container" class="card shadow-lg p-5 rounded-4">
+                <h2 id="event-name" class="text-center mb-4">Yükleniyor...</h2>
 
-                <div id="event-images" class="row mt-4"></div>
+                <div class="mb-3">
+                    <p class="mb-1"><strong class="text-primary">Tarih:</strong> <span id="event-date"></span></p>
+                    <p class="mb-1"><strong class="text-primary">Açıklama:</strong> <span id="event-desc"></span></p>
+                    <p class="mb-1"><strong class="text-primary">Salon:</strong> <span id="event-room"></span></p>
+                </div>
 
+                <div id="event-images" class="row mt-4 g-3"></div>
+
+                <!-- Butonlar buraya JS ile eklenecek -->
             </div>
         </div>
 
         <%- include('partials/footer') %>
 
-        <script>
-            document.addEventListener("DOMContentLoaded", () => {
-                const params = new URLSearchParams(window.location.search);
-                const eventId = params.get('eventID');
-                const container = document.getElementById("event-container");
-            
-                if (!eventId) {
-                    container.innerHTML = "<p>Etkinlik ID bulunamadı.</p>";
-                    return;
-                }
-            
-                fetch(`/getEventDetails?event_ID=${eventId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.err) {
-                            container.innerHTML = `<p>${data.err}</p>`;
-                            return;
-                        }
-            
-                        document.getElementById("event-name").innerText = data.eventName;
-                        document.getElementById("event-date").innerText = data.eventDate;
-                        document.getElementById("event-desc").innerText = data.eventDescription;
-                        document.getElementById("event-room").innerText = data.rooms_Name;
-            
-                        const imageContainer = document.getElementById("event-images");
-                        if (data.imagePaths && data.imagePaths.length > 0) {
-                            data.imagePaths.forEach(path => {
-                                const col = document.createElement("div");
-                                col.className = "col-md-4 mb-3";
-                                col.innerHTML = `<img src="/${path}" class="img-fluid rounded shadow-sm">`;
-                                imageContainer.appendChild(col);
-                            });
-                        }
-            
-            
-                        // Onay / Reddet Butonları
-                        const approveBtn = document.createElement("button");
-                        approveBtn.className = "btn btn-primary me-2";
-                        approveBtn.innerText = "Onayla";
-                        approveBtn.onclick = () => sendAnswer(1);
-            
-                        const rejectBtn = document.createElement("button");
-                        rejectBtn.className = "btn btn-danger";
-                        rejectBtn.innerText = "Reddet";
-                        rejectBtn.onclick = () => sendAnswer(0);
-            
-                        container.appendChild(document.createElement("hr"));
-                        container.appendChild(approveBtn);
-                        container.appendChild(rejectBtn);
-                    })
-                    .catch(err => {
-                        container.innerHTML = `<p>Veri alınırken hata oluştu: ${err}</p>`;
-                    });
-            
-                function sendAnswer(answer) {
-                    fetch('/sendAnswerForAdmin', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            answer: answer,
-                            events_ID: eventId
-                        })
-                    })
-                    .then(res => res.json())
-                    .then(data => {
-                        alert(data.message || "Durum güncellendi.");
-                        window.location.href = "/etkinlikOnayPaneli"; // yönlendirme
-                    })
-                    .catch(err => {
-                        alert("Bir hata oluştu: " + err.message);
-                    });
-                }
-            });
-            </script>
-            
+            <script>
+                document.addEventListener("DOMContentLoaded", () => {
+                    const params = new URLSearchParams(window.location.search);
+                    const eventId = params.get('eventID');
+                    const container = document.getElementById("event-container");
 
+                    if (!eventId) {
+                        container.innerHTML = "<p>Etkinlik ID bulunamadı.</p>";
+                        return;
+                    }
+
+                    fetch(`/getEventDetails?event_ID=${eventId}`)
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.err) {
+                                container.innerHTML = `<p>${data.err}</p>`;
+                                return;
+                            }
+
+                            document.getElementById("event-name").innerText = data.eventName;
+                            document.getElementById("event-date").innerText = data.eventDate;
+                            document.getElementById("event-desc").innerText = data.eventDescription;
+                            document.getElementById("event-room").innerText = data.rooms_Name;
+
+                            const imageContainer = document.getElementById("event-images");
+                            if (data.imagePaths && data.imagePaths.length > 0) {
+                                data.imagePaths.forEach(path => {
+                                    const col = document.createElement("div");
+                                    col.className = "col-md-4";
+                                    col.innerHTML = `
+                                <div class="card shadow-sm border-0 h-100">
+                                    <img src="/${path}" class="card-img-top rounded-3" alt="Etkinlik Görseli">
+                                </div>`;
+                                    imageContainer.appendChild(col);
+                                });
+                            }
+
+                            // Onay / Reddet Butonları
+                            const btnWrapper = document.createElement("div");
+                            btnWrapper.className = "mt-4 text-center";
+
+                            const approveBtn = document.createElement("button");
+                            approveBtn.className = "btn btn-success me-2 px-4";
+                            approveBtn.innerText = "Onayla";
+                            approveBtn.onclick = () => sendAnswer(1);
+
+                            const rejectBtn = document.createElement("button");
+                            rejectBtn.className = "btn btn-danger px-4";
+                            rejectBtn.innerText = "Reddet";
+                            rejectBtn.onclick = () => sendAnswer(0);
+
+                            btnWrapper.appendChild(approveBtn);
+                            btnWrapper.appendChild(rejectBtn);
+
+                            container.appendChild(btnWrapper);
+                        })
+                        .catch(err => {
+                            container.innerHTML = `<p class="text-danger">Veri alınırken hata oluştu: ${err}</p>`;
+                        });
+
+                    function sendAnswer(answer) {
+                        fetch('/sendAnswerForAdmin', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({
+                                answer: answer,
+                                events_ID: eventId
+                            })
+                        })
+                            .then(res => res.json())
+                            .then(data => {
+                                alert(data.message || "Durum güncellendi.");
+                                window.location.href = "/etkinlikOnayPaneli";
+                            })
+                            .catch(err => {
+                                alert("Bir hata oluştu: " + err.message);
+                            });
+                    }
+                });
+            </script>
 </body>
 
 </html>
