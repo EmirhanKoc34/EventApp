@@ -2,36 +2,58 @@
 <html lang="tr">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Etkinlik Detay</title>
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
 </head>
 
-<body class="d-flex flex-column min-vh-100">
-
+<body class="d-flex flex-column min-vh-100 bg-light">
     <%- include('partials/nav') %>
 
         <div class="container mt-5">
-            <div id="event-container" class="card shadow-sm p-4">
-                <h3 id="event-name">Yükleniyor...</h3>
-                <p><strong>Tarih:</strong> <span id="event-date"></span></p>
-                <p><strong>Açıklama:</strong> <span id="event-desc"></span></p>
-                <p><strong>Salon:</strong> <span id="event-room"></span></p>
+            <div id="event-container" class="card shadow-lg p-5 rounded-4">
+                <h2 id="event-name" class="text-center mb-4">Yükleniyor...</h2>
 
-                <div id="event-images" class="row mt-4"></div>
+                <!-- Etkinlik Bilgileri -->
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
 
-                <a id="ticket-link" href="#" class="btn btn-success mt-3">Bilet Al</a>
+                        <ul class="list-group list-group-flush fs-5 mb-4">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span class="fw-semibold text-secondary">Tarih:</span>
+                                <span id="event-date"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span class="fw-semibold text-secondary">Salon:</span>
+                                <span id="event-room"></span>
+                            </li>
+                        </ul>
+
+                        <!-- Açıklama Kutusu -->
+                        <div class="mb-4">
+                            <h5 class="text-secondary fw-semibold">Açıklama:</h5>
+                            <div id="event-desc" class="p-3 bg-white border rounded-3 shadow-sm text-dark"
+                                style="white-space: pre-line;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Görseller -->
+                <div id="event-images" class="row mt-4 g-3 justify-content-center"></div>
+
+                <!-- Bilet Al -->
+                <div class="text-center mt-4">
+                    <a id="ticket-link" href="#" class="btn btn-success btn-lg px-5">🎫 Bilet Al</a>
+                </div>
             </div>
         </div>
 
         <%- include('partials/footer') %>
 
             <script>
-                // Etkinlik ID’yi URL'den al
                 const urlParams = new URLSearchParams(window.location.search);
                 const eventId = urlParams.get("event_ID");
 
-                // API'den veriyi çek
                 fetch(`/getEventDetails?event_ID=${eventId}`)
                     .then(res => res.json())
                     .then(data => {
@@ -47,19 +69,25 @@
                         document.getElementById('ticket-link').href = `/etkinlikKoltukSec?eventID=${data.events_ID}`;
 
                         const imagesDiv = document.getElementById('event-images');
-                        data.imagePaths.forEach(path => {
-                            const img = document.createElement('img');
-                            img.src = `/${path}`;
-                            img.classList.add('col-md-4', 'mb-3', 'img-fluid', 'rounded');
-                            imagesDiv.appendChild(img);
-                        });
+                        if (data.imagePaths.length === 0) {
+                            imagesDiv.innerHTML = "<p class='text-center text-muted'>Etkinliğe ait görsel bulunamadı.</p>";
+                        } else {
+                            data.imagePaths.forEach(path => {
+                                const col = document.createElement("div");
+                                col.className = "col-md-4";
+                                col.innerHTML = `
+                            <div class="card border-0 shadow-sm h-100">
+                                <img src="/${path}" class="card-img-top rounded-3" alt="Etkinlik Görseli">
+                            </div>`;
+                                imagesDiv.appendChild(col);
+                            });
+                        }
                     })
                     .catch(err => {
                         console.error("Hata:", err);
-                        document.getElementById('event-container').innerHTML = '<p>Veri alınamadı.</p>';
+                        document.getElementById('event-container').innerHTML = '<p class="text-danger">Veri alınamadı.</p>';
                     });
             </script>
-
 </body>
 
 </html>

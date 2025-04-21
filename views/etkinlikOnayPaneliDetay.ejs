@@ -2,28 +2,43 @@
 <html lang="tr">
 
 <head>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
     <title>Etkinlik Detay</title>
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
 </head>
 
 <body class="d-flex flex-column min-vh-100 bg-light">
-
     <%- include('partials/nav') %>
 
         <div class="container mt-5">
             <div id="event-container" class="card shadow-lg p-5 rounded-4">
                 <h2 id="event-name" class="text-center mb-4">Yükleniyor...</h2>
 
-                <div class="mb-3">
-                    <p class="mb-1"><strong class="text-primary">Tarih:</strong> <span id="event-date"></span></p>
-                    <p class="mb-1"><strong class="text-primary">Açıklama:</strong> <span id="event-desc"></span></p>
-                    <p class="mb-1"><strong class="text-primary">Salon:</strong> <span id="event-room"></span></p>
+                <!-- Etkinlik Bilgileri -->
+                <div class="row justify-content-center">
+                    <div class="col-md-8">
+                        <ul class="list-group list-group-flush fs-5">
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span class="fw-bold text-primary">Tarih:</span>
+                                <span id="event-date"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span class="fw-bold text-primary">Açıklama:</span>
+                                <span id="event-desc" class="text-end"></span>
+                            </li>
+                            <li class="list-group-item d-flex justify-content-between">
+                                <span class="fw-bold text-primary">Salon:</span>
+                                <span id="event-room"></span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
 
-                <div id="event-images" class="row mt-4 g-3"></div>
+                <!-- Görseller -->
+                <div id="event-images" class="row mt-5 g-3 justify-content-center"></div>
 
-                <!-- Butonlar buraya JS ile eklenecek -->
+                <!-- Butonlar -->
+                <div class="text-center mt-4" id="action-buttons"></div>
             </div>
         </div>
 
@@ -59,16 +74,14 @@
                                     const col = document.createElement("div");
                                     col.className = "col-md-4";
                                     col.innerHTML = `
-                                <div class="card shadow-sm border-0 h-100">
-                                    <img src="/${path}" class="card-img-top rounded-3" alt="Etkinlik Görseli">
-                                </div>`;
+                <div class="card shadow-sm border-0 h-100">
+                  <img src="/${path}" class="card-img-top rounded-3" alt="Etkinlik Görseli">
+                </div>`;
                                     imageContainer.appendChild(col);
                                 });
                             }
 
-                            // Onay / Reddet Butonları
-                            const btnWrapper = document.createElement("div");
-                            btnWrapper.className = "mt-4 text-center";
+                            const actionWrapper = document.getElementById("action-buttons");
 
                             const approveBtn = document.createElement("button");
                             approveBtn.className = "btn btn-success me-2 px-4";
@@ -80,10 +93,8 @@
                             rejectBtn.innerText = "Reddet";
                             rejectBtn.onclick = () => sendAnswer(0);
 
-                            btnWrapper.appendChild(approveBtn);
-                            btnWrapper.appendChild(rejectBtn);
-
-                            container.appendChild(btnWrapper);
+                            actionWrapper.appendChild(approveBtn);
+                            actionWrapper.appendChild(rejectBtn);
                         })
                         .catch(err => {
                             container.innerHTML = `<p class="text-danger">Veri alınırken hata oluştu: ${err}</p>`;
@@ -93,12 +104,12 @@
                         fetch('/sendAnswerForAdmin', {
                             method: 'POST',
                             headers: {
-                                'Content-Type': 'application/json'
+                                'Content-Type': 'application/json',
                             },
                             body: JSON.stringify({
                                 answer: answer,
-                                events_ID: eventId
-                            })
+                                events_ID: eventId,
+                            }),
                         })
                             .then(res => res.json())
                             .then(data => {

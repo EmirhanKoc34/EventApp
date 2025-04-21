@@ -10,6 +10,8 @@ const multer = require('multer');
 const fs = require('fs');
 const { eventNames } = require('process');
 
+
+
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap')));
 
 // Set up Multer storage engine (optional, for custom file naming and storage locations)
@@ -463,6 +465,8 @@ app.post('/isManager', isAuthenticated, isHavePriv(2), (req, res) => {
 });
 
 
+
+
 app.get('/etkinlikOnayPaneli', isAuthenticated, isHavePriv(3), (req, res) => {
     res.render("EtkinlikOnayPaneli", {
         title: 'Etkinlik Onay Paneli',
@@ -508,10 +512,19 @@ app.get('/etkinlikKoltukSec', isAuthenticated, isHavePriv(1), (req, res) => {
 
 
 app.get('/galeri', (req, res) => {
-    res.render("galeri", {
-        title: 'Giriş',
-        loggedin: !!req.cookies.token,
-        username: req.user ? req.user.username : null
+    const galleryDir = path.join(__dirname, 'public/images/galeri');
+
+    fs.readdir(galleryDir, (err, files) => {
+        if (err) {
+            console.error("Galeri dosyaları okunamadı:", err);
+            return res.render('galeri', { images: [] });
+        }
+
+        const images = files.filter(file =>
+            /\.(jpg|jpeg|png|gif|webp)$/i.test(file)
+        );
+
+        res.render('galeri', { images });
     });
 });
 
