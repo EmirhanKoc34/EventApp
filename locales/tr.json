@@ -13,5 +13,12 @@
     "allrightreserved": " Z.E.S. Tüm Hakları Saklıdır.",
     "privacypolicy": "Gizlilik Politikası",
     "termsconditions": "Şartlar ve Koşullar",
-    "reserve": "Yer Ayırt"
+    "reserve": "Yer Ayırt",
+    "eventname": "Etkinlik Adı",
+    "description": "Açıklama",
+    "time": "Zaman",
+    "choosehall": "Salon Seçiniz",
+    "hallloading": "Salonlar Yükleniyor",
+    "imagesoptional": "Görseller (Opsiyonel)",
+    "submit": "Gönder"
 }

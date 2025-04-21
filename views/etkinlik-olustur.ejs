@@ -13,40 +13,40 @@
 
         <div class="container mt-5">
             <div class="card shadow-lg p-4">
-                <h3 class="text-center mb-4">Etkinlik Oluştur</h3>
+                <h3 class="text-center mb-4"><%= __('createevent') %></h3>
                 <form action="/createEvent" method="POST" enctype="multipart/form-data">
                     <div class="mb-3">
-                        <label for="eventName" class="form-label">Etkinlik Adı</label>
+                        <label for="eventName" class="form-label"><%= __('eventname') %></label>
                         <input type="text" class="form-control" name="eventName" id="eventName" required>
                     </div>
 
                     <div class="mb-3">
-                        <label for="description" class="form-label">Açıklama</label>
+                        <label for="description" class="form-label"><%= __('description') %></label>
                         <textarea class="form-control" name="description" id="description" rows="4" required></textarea>
                     </div>
 
                     <div class="mb-3">
-                        <label for="timestamp" class="form-label">Zaman <small class="text-muted">(YYYY-MM-DD
+                        <label for="timestamp" class="form-label"><%= __('time') %> <small class="text-muted">(YYYY-MM-DD
                                 HH:MM:SS)</small></label>
                         <input type="datetime-local" class="form-control" name="timestamp" id="timestamp" required>
 
                     </div>
 
                     <div class="mb-3">
-                        <label for="roomid" class="form-label">Salon Seçin</label>
+                        <label for="roomid" class="form-label"><%= __('choosehall') %></label>
                         <select class="form-select" name="roomid" id="roomid" required>
-                            <option value="">Salonlar yükleniyor...</option>
+                            <option value=""><%= __('hallloading') %>...</option>
                         </select>
                     </div>
                     
 
                     <div class="mb-3">
-                        <label for="images" class="form-label">Görseller (opsiyonel)</label>
+                        <label for="images" class="form-label"><%= __('imagesoptional') %></label>
                         <input class="form-control" type="file" name="images" id="images" multiple accept="image/*">
                     </div>
 
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary px-4">Gönder</button>
+                        <button type="submit" class="btn btn-primary px-4"><%= __('submit') %></button>
                     </div>
                 </form>
             </div>

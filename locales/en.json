@@ -13,5 +13,12 @@
     "allrightreserved": " Z.E.S. All Rights Reserved.",
     "privacypolicy": "Privacy Policy",
     "termsconditions": "Terms And Conditions",
-    "reserve": "Reserve"
+    "reserve": "Reserve",
+    "eventname": "Event Name",
+    "description": "Description",
+    "time": "Time",
+    "choosehall": "Choose Hall",
+    "hallloading": "Halls Loading",
+    "imagesoptional": "Images (Optional)",
+    "submit": "Submit"
 }
