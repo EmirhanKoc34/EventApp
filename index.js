@@ -184,13 +184,7 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/createEventPage', isAuthenticated, isHavePriv(2), (req, res) => {
-    res.render("test", {
-        title: 'test',
-        loggedin: !!req.cookies.token,
-        username: req.user ? req.user.username : null
-    });
-});
+
 
 app.post('/getRoomsForCreate', isAuthenticated, isHavePriv(2), (req, res) => {
     let query = "select * from rooms;";
@@ -479,6 +473,7 @@ app.post('/isManager', isAuthenticated, isHavePriv(2), (req, res) => {
 app.get('/etkinlikOnayPaneli', isAuthenticated, isHavePriv(3), (req, res) => {
     res.render("EtkinlikOnayPaneli", {
         title: 'Etkinlik Onay Paneli',
+        lang: req.cookies.locale,
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null
     });
@@ -488,6 +483,7 @@ app.get('/etkinlikOnayPaneli/details', isAuthenticated, isHavePriv(3), (req, res
     res.render("etkinlikOnayPaneliDetay",
         {
             title: 'Etkinlik Onay Paneli',
+            lang: req.cookies.locale,
             loggedin: !!req.cookies.token,
             username: req.user ? req.user.username : null
         });
@@ -498,6 +494,7 @@ app.get('/etkinlikDetay', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("etkinlik-detay", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
@@ -506,6 +503,7 @@ app.get('/etkinlik-olustur', isAuthenticated, isHavePriv(2), (req, res) => {
     res.render("etkinlik-olustur", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
@@ -514,6 +512,7 @@ app.get('/etkinlikKoltukSec', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("koltuk-sec", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
@@ -536,6 +535,7 @@ app.get('/galeri', (req, res) => {
         res.render('galeri', {
             title: 'Galeri',
             loggedin: !!req.cookies.token,
+            lang: req.cookies.locale,
             username: req.user ? req.user.username : null,
             images:images 
         });
@@ -546,6 +546,7 @@ app.get('/hakkimizda', (req, res) => {
     res.render("hakkimizda", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
@@ -555,6 +556,7 @@ app.get('/anasayfa', (req, res) => {
     res.render("index", {
         title: 'Anasayfa',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
@@ -564,6 +566,7 @@ app.get('/panel', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("panel", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
@@ -572,6 +575,7 @@ app.get("/login", (req, res) => {
     res.render("login", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
@@ -611,6 +615,7 @@ app.get("/signup", (req, res) => {
     res.render("signup", {
         title: 'Kayıt Ol',
         loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
         username: req.user ? req.user.username : null
     });
 });
