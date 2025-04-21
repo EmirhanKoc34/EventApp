@@ -256,7 +256,7 @@ app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, r
                     promises.push(new Promise((resolve, reject) => {
                         const oldPath = file.path;
                         const ext = path.extname(file.originalname);
-                        const newFileName = `${index}` + ext; // Make unique file name using index
+                        const newFileName = `${index}.png` ; // Make unique file name using index
                         const newPath = path.join(eventFolder, newFileName);
 
                         // Move the file to the event folder
