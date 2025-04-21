@@ -1,0 +1,36 @@
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h3 class="text-center mb-4">Etkinlik Oluştur</h3>
+        <form action="/createEvent" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="eventName" class="form-label">Etkinlik Adı</label>
+                <input type="text" class="form-control" name="eventName" id="eventName" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Açıklama</label>
+                <textarea class="form-control" name="description" id="description" rows="4" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="timestamp" class="form-label">Zaman <small class="text-muted">(YYYY-MM-DD
+                        HH:MM:SS)</small></label>
+                <input type="text" class="form-control" name="timestamp" id="timestamp" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="roomid" class="form-label">Salon ID</label>
+                <input type="number" class="form-control" name="roomid" id="roomid" required>
+            </div>
+
+            <div class="mb-3">
+                <label for="images" class="form-label">Görseller (opsiyonel)</label>
+                <input class="form-control" type="file" name="images" id="images" multiple accept="image/*">
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary px-4">Gönder</button>
+            </div>
+        </form>
+    </div>
+</div>

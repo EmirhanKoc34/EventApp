@@ -48,7 +48,7 @@ const uploadMultiple = upload.array('images', 5); // Up to 5 images
 const JWT_SECRET = '7324f7115b13969bb06d94dfb332ef216383aa29700b460a72b3baef689ff6bfdb6aaf1fda8a0adfe0d2111663b49bce5d71ffb43bbbcd115c52a029313bafa6a9188f666b5809b86326529d4d1a0790923d4d613f54913fbfa6b6a3c4d4db5fa37037ccd9ace700fd238b92facf4bc54ec8cf93d8d7fc9fcd6e339656159f4ee5f692bcc6e8e48915e4c0f26fd45b6f6f6df3be0460ca7c0e2ee2cd0029d934b662409a4c57073437e7b7635ce7f6c54ae5298bee463ac6005651238d96e90b821277b9252258b511fb496b8f52fc7081c968b6887e5117d3b96dc40c5348e7b6d525724e89769c0022bb44ae8b642713ffc65fa0fd0db34660d1ffddf72060'; // Change this to a strong secret key
 
 app.set('view engine', 'ejs');
-app.use(express.static(path.join(__dirname,"/public")));
+app.use(express.static(path.join(__dirname, "/public")));
 app.use(cookieParser());
 
 
@@ -59,12 +59,12 @@ var con = mysql.createConnection({//mysql connections
     password: "Mysql123!",
     database: "eventapp",
     port: 3306
-    });
+});
 
-con.connect(function(err) {
-        if (err) throw err;
-        console.log("Connected to MySQL database!");
-    });
+con.connect(function (err) {
+    if (err) throw err;
+    console.log("Connected to MySQL database!");
+});
 
 i18n.configure({
     locales: ['en', 'tr'], // Supported languages
@@ -99,7 +99,7 @@ function isAuthenticated(req, res, next) {
 }
 
 function isHavePriv(privType) {
-    return function(req, res, next) {
+    return function (req, res, next) {
         let username = req.user.username;
 
         // SQL query to get the user's groupID based on username
@@ -136,7 +136,7 @@ function isHavePriv(privType) {
 
             // Construct the SQL query
             let usernamequery = [`"${username}"`];
-            
+
             let privQuery = `SELECT * FROM users JOIN user_groups ON users.user_Group_ID = user_groups.group_ID JOIN group_privilages on user_groups.privID = group_privilages.group_Priv_ID  WHERE BINARY users.user_Name = ${usernamequery} AND group_privilages.${priv};`;
 
             // Execute the privilege check query
@@ -149,7 +149,7 @@ function isHavePriv(privType) {
                 if (privResults.length > 0) {
                     return next();
                 } else {
-                    
+
                     return res.redirect('/anasayfa');
                 }
             });
@@ -163,7 +163,7 @@ app.use((req, res, next) => {
             const decoded = jwt.verify(req.cookies.token, JWT_SECRET);
             req.user = decoded; // Set the decoded token as req.user
         } catch (err) {
-            
+
             res.clearCookie('token');
             return res.redirect("/anasayfa");
         }
@@ -182,17 +182,15 @@ app.get('/', (req, res) => {
 });
 
 
-app.get('/createEventPage',isAuthenticated,isHavePriv(2),(req,res)=>
-{
+app.get('/createEventPage', isAuthenticated, isHavePriv(2), (req, res) => {
     res.render("test", {
         title: 'test',
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null
-    } );
+    });
 })
 
-app.get('/getRoomsForCreate',isAuthenticated,isHavePriv(2),(req,res)=>
-{
+app.get('/getRoomsForCreate', isAuthenticated, isHavePriv(2), (req, res) => {
 
 });
 
@@ -243,7 +241,7 @@ app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, r
                 let imagePaths = [];
                 let promises = [];
 
-                req.files.forEach((file,index) => {
+                req.files.forEach((file, index) => {
                     promises.push(new Promise((resolve, reject) => {
                         const oldPath = file.path;
                         const ext = path.extname(file.originalname);
@@ -289,63 +287,58 @@ app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, r
 
 
 
-app.get('/getEventsForAdmin',isAuthenticated,isHavePriv(3),(req,res)=>// get list of events for approving 
+app.get('/getEventsForAdmin', isAuthenticated, isHavePriv(3), (req, res) =>// get list of events for approving 
 {
     let query = `select events.events_ID, eventName,eventDate,approved, rooms_Name from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID ORDER BY approved;`;
-    con.query(query,(err,result)=>
-    {
+    con.query(query, (err, result) => {
         if (err) {
             return res.status(500).send("Failed to get Events " + err.message);
         }
-        if(result.length > 0)
-        {
+        if (result.length > 0) {
             res.json(result);
         }
-        else{
-            res.status(404).json({error: "No Events Found"});
+        else {
+            res.status(404).json({ error: "No Events Found" });
         }
     })
 
 });
 
-app.get('/getEventDetailsForAdmin',isAuthenticated,isHavePriv(3),(req,res)=> // To get the details for event for admin to approve or reject
+app.get('/getEventDetailsForAdmin', isAuthenticated, isHavePriv(3), (req, res) => // To get the details for event for admin to approve or reject
 {
     let events_ID = req.query.events_ID;
 
     let query = 'select events.events_ID, events.approved, users.user_Name,rooms.rooms_Name, events_details.eventName,events_details.eventDescription, events_details.eventDate from events join events_details on events.events_ID = events_details.events_ID join users on events.organizer_ID = users.user_ID join rooms on events.events_Room_ID= rooms.rooms_ID where events.events_ID = ?;';
-    con.query(query,[events_ID],(err,result)=>
-    {
+    con.query(query, [events_ID], (err, result) => {
         if (err) {
             return res.status(500).send("Failed to Get Event Details: " + err.message);
         }
-        if(result.length > 0)
-        {
+        if (result.length > 0) {
             const eventFolder = path.join(__dirname, 'public', 'uploads', String(events_ID));
             fs.readdir(eventFolder, (fsErr, files) => {
                 if (fsErr) {
                     // Klasör yoksa resim yok kabul edilir
                     return res.json({ ...result[0], images: [] });
                 }
-        
+
                 const imagePaths = files.map(file => `/uploads/${events_ID}/${file}`);
                 return res.json({ ...result[0], images: imagePaths });
             });
         }
-        else{
-            res.status(404).json({error: "Invalid event ID"})
+        else {
+            res.status(404).json({ error: "Invalid event ID" })
         }
 
     });
 });
 
 
-app.post('/sendAnswerForAdmin',isAuthenticated,isHavePriv(3),(req,res)=>// Send answer for admin to reject approve
+app.post('/sendAnswerForAdmin', isAuthenticated, isHavePriv(3), (req, res) =>// Send answer for admin to reject approve
 {
     let answer = req.body.answer; // send 1 or 0 
     let events_ID = req.body.events_ID;
     let query = "UPDATE `eventapp`.`events` SET `approved` = ? WHERE (`events_ID` = ?);";
-    con.query(query,[answer,events_ID],(err,result)=>
-    {
+    con.query(query, [answer, events_ID], (err, result) => {
         if (err) {
             return res.status(500).send("Failed to set answer: " + err.message);
         }
@@ -354,14 +347,12 @@ app.post('/sendAnswerForAdmin',isAuthenticated,isHavePriv(3),(req,res)=>// Send 
 });
 
 
-app.get('/getEvents',isAuthenticated, isHavePriv(1), (req,res)=>
-{
+app.get('/getEvents', isAuthenticated, isHavePriv(1), (req, res) => {
     let query = `select events.events_ID, eventName,eventDate,approved, rooms_Name from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where approved = 1 order by events_details.eventDate;`;
-    con.query(query,(err,result)=>
-    {        
+    con.query(query, (err, result) => {
         if (err) {
             return res.status(500).send("Failed Get Events Data");
-        } 
+        }
         if (result.length > 0) {
             res.send(result);
         } else {
@@ -420,12 +411,10 @@ app.get('/getEventDetails', isAuthenticated, isHavePriv(1), (req, res) => {
     });
 });
 
-app.post('/getSeats',isAuthenticated,isHavePriv(1),(req,res)=>
-{
+app.post('/getSeats', isAuthenticated, isHavePriv(1), (req, res) => {
     let event_ID = req.body.event_ID;
     let query = 'select seats_ID from rooms join seats on seats_Room_ID = rooms.rooms_ID join events on events.events_Room_ID = rooms.rooms_ID  where events_ID = ?;';
-    con.query(query,[event_ID],(err,result)=>
-    {
+    con.query(query, [event_ID], (err, result) => {
         if (err) {
             return res.status(500).send("Failed Get Seats Data");
         }
@@ -436,19 +425,17 @@ app.post('/getSeats',isAuthenticated,isHavePriv(1),(req,res)=>
 
 });
 
-app.post('/sendTicket',isAuthenticated,isHavePriv(1),(req,res)=>
-{
+app.post('/sendTicket', isAuthenticated, isHavePriv(1), (req, res) => {
     let seatID = req.body.seatID;
     let eventID = req.body.eventID;
     let userId = req.user.id;
 
-    let query= "INSERT INTO `eventapp`.`tickets` (`tickets_Event_ID`, `tickets_User_ID`, `tickets_Seat_ID`) VALUES (?, ?, ?);";
-    con.query(query,[eventID,userId,seatID],(err,result)=>
-    {     
+    let query = "INSERT INTO `eventapp`.`tickets` (`tickets_Event_ID`, `tickets_User_ID`, `tickets_Seat_ID`) VALUES (?, ?, ?);";
+    con.query(query, [eventID, userId, seatID], (err, result) => {
         if (err) {
             return res.status(500).send("Failed to insert into tickets");
-        }  
-        res.status(200).json({message: "Successful"});
+        }
+        res.status(200).json({ message: "Successful" });
 
     });
 });
@@ -457,29 +444,26 @@ app.post('/sendTicket',isAuthenticated,isHavePriv(1),(req,res)=>
 app.post('/update-lang', (req, res) => {
     const lang = req.body.lang;
     if (lang && i18n.getLocales().includes(lang)) {
-        res.cookie('locale', lang,{ maxAge: 25920000000, httpOnly: true }); // Save language in cookies
+        res.cookie('locale', lang, { maxAge: 25920000000, httpOnly: true }); // Save language in cookies
         res.setLocale(lang); // Set the locale for the response
         res.status(200).send('Lang cookie updated');
     }
-    else{
+    else {
         res.status(400).send("Error updating lang");
     }
 
 });
 
-app.post('/isAdmin',isAuthenticated,isHavePriv(3),(req,res)=>
-{
-    res.status(200).json({message: "Successful"});
+app.post('/isAdmin', isAuthenticated, isHavePriv(3), (req, res) => {
+    res.status(200).json({ message: "Successful" });
 });
 
-app.post('/isManager',isAuthenticated,isHavePriv(2),(req,res)=>
-{
-    res.status(200).json({message: "Successful"});
+app.post('/isManager', isAuthenticated, isHavePriv(2), (req, res) => {
+    res.status(200).json({ message: "Successful" });
 });
 
 
-app.get('/etkinlikOnayPaneli',isAuthenticated,isHavePriv(3),(req,res)=>
-{
+app.get('/etkinlikOnayPaneli', isAuthenticated, isHavePriv(3), (req, res) => {
     res.render("EtkinlikOnayPaneli", {
         title: 'Etkinlik Onay Paneli',
         loggedin: !!req.cookies.token,
@@ -487,8 +471,7 @@ app.get('/etkinlikOnayPaneli',isAuthenticated,isHavePriv(3),(req,res)=>
     });
 });
 
-app.get('/etkinlikOnayPaneli/details',isAuthenticated,isHavePriv(3),(req,res)=>
-{
+app.get('/etkinlikOnayPaneli/details', isAuthenticated, isHavePriv(3), (req, res) => {
     res.render("etkinlikOnayPaneliDetay",
         {
             title: 'Etkinlik Onay Paneli',
@@ -498,7 +481,7 @@ app.get('/etkinlikOnayPaneli/details',isAuthenticated,isHavePriv(3),(req,res)=>
 
 });
 
-app.get('/etkinlikDetay',isAuthenticated,isHavePriv(1), (req, res) => {
+app.get('/etkinlikDetay', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("etkinlik-detay", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
@@ -506,8 +489,15 @@ app.get('/etkinlikDetay',isAuthenticated,isHavePriv(1), (req, res) => {
     });
 });
 
-app.get('/etkinlikKoltukSec',isAuthenticated,isHavePriv(1),(req,res)=>
-{
+app.get('/etkinlik-olustur', isAuthenticated, isHavePriv(2), (req, res) => {
+    res.render("etkinlik-olustur", {
+        title: 'Giriş',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
+    });
+});
+
+app.get('/etkinlikKoltukSec', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("koltuk-sec", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
@@ -534,18 +524,16 @@ app.get('/hakkimizda', (req, res) => {
 });
 
 
-app.get('/anasayfa',(req,res)=>
-    {
-        res.render("index", {
-            title: 'Anasayfa',
-            loggedin: !!req.cookies.token,
-            username: req.user ? req.user.username : null
-        });
+app.get('/anasayfa', (req, res) => {
+    res.render("index", {
+        title: 'Anasayfa',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
     });
+});
 
 
-app.get('/panel',isAuthenticated,isHavePriv(1),(req,res)=>
-{
+app.get('/panel', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("panel", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
@@ -553,13 +541,12 @@ app.get('/panel',isAuthenticated,isHavePriv(1),(req,res)=>
     });
 });
 
-app.get("/login", (req,res)=>
-{
+app.get("/login", (req, res) => {
     res.render("login", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null
-    } );
+    });
 });
 
 app.get("/login/check", (req, res) => {
@@ -570,12 +557,12 @@ app.get("/login/check", (req, res) => {
     let hashedPassword = hashPassword(person.password);// hashes the inputed password
     let query = 'SELECT * FROM users WHERE BINARY user_Name = ?;';
     let name = [person.username];
-    
+
     con.query(query, name, function (err, results) {
         if (err) {
             return res.status(500).send('Database query failed.');
         }
-       
+
         if (results.length === 1) {
             let sqlStoredHashedPassword = results[0].user_Password; // we have already get the password with the first query so we are just checking it here
             if (sqlStoredHashedPassword === hashedPassword) {
@@ -593,17 +580,15 @@ app.get("/login/check", (req, res) => {
 
 
 
-app.get("/signup", (req,res)=>
-    {
-        res.render("signup", {
-            title: 'Kayıt Ol',
-            loggedin: !!req.cookies.token,
-            username: req.user ? req.user.username : null
-        });
+app.get("/signup", (req, res) => {
+    res.render("signup", {
+        title: 'Kayıt Ol',
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
     });
+});
 
-app.get("/signup/check", (req,res)=>
-{
+app.get("/signup/check", (req, res) => {
     const person =
     {
         username: req.query.username,
@@ -617,7 +602,7 @@ app.get("/signup/check", (req,res)=>
         if (err) {
             return res.status(500).send('Database query failed.');
         }
-        
+
         if (results.length > 0) {
             return res.send(`betterAlert(3, "Bu Kullanıcı adı bulunuyor, giriş yapın yada başka bir kullanıcı adı seçin", "Hata!");`);
         } else {
@@ -650,7 +635,7 @@ function hashPassword(password) {
 let port = 8001;
 let ip = "0.0.0.0";
 
-let server = app.listen(port,ip, (error) => {
-if(error) throw error;
-    console.log("Server is running on:",ip, port);
+let server = app.listen(port, ip, (error) => {
+    if (error) throw error;
+    console.log("Server is running on:", ip, port);
 });
