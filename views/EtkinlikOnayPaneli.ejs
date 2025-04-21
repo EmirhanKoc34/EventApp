@@ -10,7 +10,7 @@
 <body class="d-flex flex-column min-vh-100">
 
   <div class="container">
-    <h1 class="text-center mb-5 fw-bold">Etkinlik Onay Paneli</h1>
+    <h1 class="text-center mb-5 fw-bold"><%= __('eventsconfirmpage') %></h1>
 
     <div id="etkinlik-listesi" class="row gy-4">
       <!-- Etkinlikler burada dinamik olarak eklenecek -->
@@ -56,13 +56,13 @@
 
         if (durum === null) {
           durumBadge = 'bg-warning text-dark';
-          durumText = 'Bekliyor';
+          durumText = "<%= __('waiting') %>";
         } else if (durum === 0) {
           durumBadge = 'bg-danger';
-          durumText = 'Reddedildi';
+          durumText = "<%= __('rejected') %>";
         } else if (durum === 1) {
           durumBadge = 'bg-success';
-          durumText = 'Onaylandı';
+          durumText = "<%= __('confirmed') %>";
         }
   
         card.innerHTML = `

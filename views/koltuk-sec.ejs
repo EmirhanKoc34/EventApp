@@ -54,7 +54,7 @@
     <%- include('partials/nav') %>
 
     <div class="container text-center">
-        <h2 class="mb-4">Koltuk Seçimi</h2>
+        <h2 class="mb-4"><%= __('chooseseat') %></h2>
 
         <form id="ticketForm">
             <div id="seat-grid" class="mb-4">
@@ -62,8 +62,8 @@
             </div>
 
             <div class="action-buttons">
-                <button type="submit" class="btn btn-success me-2">Onayla</button>
-                <a href="/" class="btn btn-secondary">İptal</a>
+                <button type="submit" class="btn btn-success me-2"><%= __('confirm') %></button>
+                <a href="/" class="btn btn-secondary"><%= __('cancel') %></a>
             </div>
         </form>
     </div>

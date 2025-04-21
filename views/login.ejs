@@ -38,24 +38,24 @@
   <div class="container">
     <div class="login-container">
       <form action="/login/check" id="form" method="get">
-        <h1>Giriş Yap</h1>
+        <h1><%= __('login') %></h1>
 
         <div class="mb-3">
-          <input type="name" id="username" name="username" class="form-control" placeholder="Kullanıcı Adı"
+          <input type="name" id="username" name="username" class="form-control" placeholder="<%= __('username') %>"
             autocomplete="nickname"
             oninput="this.value = this.value.replace(/\s/g, ''); this.value = this.value.slice(0, 45);" required>
         </div>
 
         <div class="mb-3">
-          <input type="password" id="password" name="password" class="form-control" placeholder="Şifre"
+          <input type="password" id="password" name="password" class="form-control" placeholder="<%= __('password') %>"
             autocomplete="password" oninput="this.value = this.value.replace(/\s/g, '');" required>
         </div>
 
-        <p id="empty" class="error">Gerekli Alanları Doldurmalısınız*</p>
+        <p id="empty" class="error"><%= __('fillrequested') %>*</p>
 
         <div class="d-grid gap-2">
-          <button type="submit" onclick="inputCheck()" class="btn btn-primary">Giriş</button>
-          <button type="button" onclick="signup()" class="btn btn-outline-secondary">Kayıt Ol</button>
+          <button type="submit" onclick="inputCheck()" class="btn btn-primary"><%= __('login') %></button>
+          <button type="button" onclick="signup()" class="btn btn-outline-secondary"><%= __('signup') %></button>
         </div>
       </form>
     </div>

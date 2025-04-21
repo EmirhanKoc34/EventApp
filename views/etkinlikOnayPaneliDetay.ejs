@@ -12,25 +12,25 @@
 
         <div class="container mt-5">
             <div id="event-container" class="card shadow-lg p-5 rounded-4">
-                <h2 id="event-name" class="text-center mb-5">Yükleniyor...</h2>
+                <h2 id="event-name" class="text-center mb-5"><%= __('loading') %>...</h2>
 
                 <!-- Etkinlik Bilgileri -->
                 <div class="row justify-content-center">
                     <div class="col-md-8">
 
                         <div class="mb-4">
-                            <h5 class="fw-bold text-primary">📅 Tarih</h5>
+                            <h5 class="fw-bold text-primary">📅 <%= __('time') %></h5>
                             <div id="event-date" class="p-3 bg-white border rounded shadow-sm text-dark"></div>
                         </div>
 
                         <div class="mb-4">
-                            <h5 class="fw-bold text-primary">📝 Açıklama</h5>
+                            <h5 class="fw-bold text-primary">📝 <%= __('description') %></h5>
                             <div id="event-desc" class="p-3 bg-white border rounded shadow-sm text-dark"
                                 style="white-space: pre-line;"></div>
                         </div>
 
                         <div class="mb-4">
-                            <h5 class="fw-bold text-primary">🏛️ Salon</h5>
+                            <h5 class="fw-bold text-primary">🏛️ <%= __('hall') %></h5>
                             <div id="event-room" class="p-3 bg-white border rounded shadow-sm text-dark"></div>
                         </div>
 
@@ -88,12 +88,12 @@
 
                             const approveBtn = document.createElement("button");
                             approveBtn.className = "btn btn-success me-2 px-4";
-                            approveBtn.innerText = "Onayla";
+                            approveBtn.innerText = "<%= __('confirm') %>";
                             approveBtn.onclick = () => sendAnswer(1);
 
                             const rejectBtn = document.createElement("button");
                             rejectBtn.className = "btn btn-danger px-4";
-                            rejectBtn.innerText = "Reddet";
+                            rejectBtn.innerText = "<%= __('reject') %>";
                             rejectBtn.onclick = () => sendAnswer(0);
 
                             actionWrapper.appendChild(approveBtn);
