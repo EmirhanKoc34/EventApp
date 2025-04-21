@@ -9,5 +9,9 @@
     "login": "Login",
     "gallery": "Gallery",
     "about": "About",
-    "lang": "Language"
+    "lang": "Language",
+    "allrightreserved": " Z.E.S. All Rights Reserved.",
+    "privacypolicy": "Privacy Policy",
+    "termsconditions": "Terms And Conditions",
+    "reserve": "Reserve"
 }
