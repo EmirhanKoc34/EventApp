@@ -33,9 +33,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="roomid" class="form-label">Salon ID</label>
-                        <input type="number" class="form-control" name="roomid" id="roomid" required>
+                        <label for="roomid" class="form-label">Salon Seçin</label>
+                        <select class="form-select" name="roomid" id="roomid" required>
+                            <option value="">Salonlar yükleniyor...</option>
+                        </select>
                     </div>
+                    
 
                     <div class="mb-3">
                         <label for="images" class="form-label">Görseller (opsiyonel)</label>
@@ -50,5 +53,42 @@
         </div>
         <%- include('partials/footer') %>
 </body>
+
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch('/getRoomsForCreate', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            const select = document.getElementById('roomid');
+            select.innerHTML = ''; // Eski "yükleniyor" mesajını temizle
+
+            data.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.rooms_ID;
+                option.textContent = room.rooms_Name;
+                select.appendChild(option);
+            });
+
+            // Eğer hiç salon yoksa
+            if (data.length === 0) {
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'Salon bulunamadı';
+                select.appendChild(option);
+            }
+        })
+        .catch(err => {
+            console.error('Salonlar alınamadı:', err);
+            const select = document.getElementById('roomid');
+            select.innerHTML = '<option value="">Salonlar yüklenemedi</option>';
+        });
+    });
+</script>
+
 
 </html>
