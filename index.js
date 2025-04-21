@@ -339,7 +339,7 @@ app.get('/getEventDetailsForAdmin',isAuthenticated,isHavePriv(3),(req,res)=> // 
 });
 
 
-app.post('/sendAnswerForAdmin',(req,res)=>// Send answer for admin to reject approve
+app.post('/sendAnswerForAdmin',isAuthenticated,isHavePriv(3),(req,res)=>// Send answer for admin to reject approve
 {
     let answer = req.body.answer; // send 1 or 0 
     let events_ID = req.body.events_ID;
@@ -467,8 +467,18 @@ app.post('/update-lang', (req, res) => {
 
 });
 
+app.post('/isAdmin',isAuthenticated,isHavePriv(3),(req,res)=>
+{
+    res.status(200).json({message: "Successful"});
+});
 
-app.get('/etkinlikOnayPaneli',(req,res)=>
+app.post('/isManager',isAuthenticated,isHavePriv(2),(req,res)=>
+{
+    res.status(200).json({message: "Successful"});
+});
+
+
+app.get('/etkinlikOnayPaneli',isAuthenticated,isHavePriv(3),(req,res)=>
 {
     res.render("EtkinlikOnayPaneli", {
         title: 'Etkinlik Onay Paneli',
@@ -477,7 +487,7 @@ app.get('/etkinlikOnayPaneli',(req,res)=>
     });
 });
 
-app.get('/etkinlikOnayPaneli/details',(req,res)=>
+app.get('/etkinlikOnayPaneli/details',isAuthenticated,isHavePriv(3),(req,res)=>
 {
     res.render("etkinlikOnayPaneliDetay",
         {
@@ -488,7 +498,7 @@ app.get('/etkinlikOnayPaneli/details',(req,res)=>
 
 });
 
-app.get('/etkinlikDetay', (req, res) => {
+app.get('/etkinlikDetay',isAuthenticated,isHavePriv(1), (req, res) => {
     res.render("etkinlik-detay", {
         title: 'Giriş',
         loggedin: !!req.cookies.token,
@@ -496,7 +506,7 @@ app.get('/etkinlikDetay', (req, res) => {
     });
 });
 
-app.get('/etkinlikKoltukSec',(req,res)=>
+app.get('/etkinlikKoltukSec',isAuthenticated,isHavePriv(1),(req,res)=>
 {
     res.render("koltuk-sec", {
         title: 'Giriş',
@@ -534,7 +544,7 @@ app.get('/anasayfa',(req,res)=>
     });
 
 
-app.get('/panel',(req,res)=>
+app.get('/panel',isAuthenticated,isHavePriv(1),(req,res)=>
 {
     res.render("panel", {
         title: 'Giriş',
@@ -571,7 +581,7 @@ app.get("/login/check", (req, res) => {
             if (sqlStoredHashedPassword === hashedPassword) {
                 const token = jwt.sign({ username: person.username, id: results[0].user_ID }, JWT_SECRET, { expiresIn: '30d' });// creates token
                 res.cookie('token', token, { httpOnly: true }); //stores that token in cookie
-                res.redirect("/profile");
+                res.redirect("/anasayfa");
             } else {//Wrong password
                 res.redirect("/login");
             }

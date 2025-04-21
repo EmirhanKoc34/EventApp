@@ -27,12 +27,54 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/panel">Etkinlikler</a>
                 </li>
-                <li class="nav-item">
+                <li class="nav-item" id="etkinlikOnayPaneli">
                     <a class="nav-link" href="/etkinlikOnayPaneli">Etkinlik Onay Paneli</a>
+                </li>
+                <li class="nav-item" id="etkinlikOlustur">
+                    <a class="nav-link" href="/etkinlikOlustur">Etkinlik Oluştur</a>
                 </li>
 
             </ul>
+            
             <a href="/login" class="btn btn-dark ms-3">Giriş Yap</a>
         </div>
     </div>
 </nav>
+<script>
+            fetch("/isAdmin",
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST",
+                })
+                .then(data => {
+                    if (data.redirected) {
+                        document.getElementById('etkinlikOnayPaneli').remove();
+                        return;
+                    }
+                })
+                .catch(err => {
+                    console.error("Hata:", err);
+                });
+
+
+                fetch("/isManager",
+                {
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    method: "POST",
+                })
+                .then(data => {
+                    if (data.redirected) {
+                        document.getElementById('etkinlikOlustur').remove();
+                        return;
+                    }
+                })
+                .catch(err => {
+                    console.error("Hata:", err);
+                });
+</script>
