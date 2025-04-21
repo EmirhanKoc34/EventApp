@@ -188,10 +188,19 @@ app.get('/createEventPage', isAuthenticated, isHavePriv(2), (req, res) => {
         loggedin: !!req.cookies.token,
         username: req.user ? req.user.username : null
     });
-})
+});
 
-app.get('/getRoomsForCreate', isAuthenticated, isHavePriv(2), (req, res) => {
-
+app.post('/getRoomsForCreate', isAuthenticated, isHavePriv(2), (req, res) => {
+    let query = "select * from rooms;";
+    con.query(query,(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Odalar Çekilemedi " + err.message);
+        }
+        else{
+            res.json(result);
+        }
+    });
 });
 
 app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, res) => {
