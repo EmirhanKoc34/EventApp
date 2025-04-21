@@ -81,6 +81,14 @@ i18n.configure({
 app.use(i18n.init);
 
 
+app.use((req, res, next) => {
+    const userLocale = req.cookies.locale || i18n.getLocale();
+    res.setLocale(userLocale);
+    res.locals.__ = res.__; // EJS içinde __ kullanımı için
+    next();
+});
+
+
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
