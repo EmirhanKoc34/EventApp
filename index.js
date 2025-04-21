@@ -533,7 +533,12 @@ app.get('/galeri', (req, res) => {
             /\.(jpg|jpeg|png|gif|webp)$/i.test(file)
         );
 
-        res.render('galeri', { images });
+        res.render('galeri', {
+            title: 'Galeri',
+            loggedin: !!req.cookies.token,
+            username: req.user ? req.user.username : null,
+            images:images 
+        });
     });
 });
 
@@ -635,7 +640,7 @@ app.get("/signup/check", (req, res) => {
                     console.error("Failed to create user:", err);
                     return res.status(500).send("Failed to create user");
                 }
-                return res.send(`window.location.replace("/login")`);
+                return res.redirect('/login');
             });
         }
     });
