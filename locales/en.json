@@ -2,5 +2,11 @@
     "settings": "Settings",
     "systemdefault": "System Default",
     "chooselang": "Choose Language",
-    "logout":"Logout"
+    "logout":"Logout",
+    "events": "Events",
+    "eventsconfirmpage": "Events Confirm Page",
+    "createevent": "Create Event",
+    "login": "Login",
+    "gallery": "Gallery",
+    "about": "About"
 }

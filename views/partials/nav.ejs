@@ -5,10 +5,10 @@
             <div class="col d-flex justify-content-start">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/galeri">Galeri</a>
+                        <a class="nav-link" href="/galeri"><%= __('gallery') %></a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="/hakkimizda">Hakkımızda</a>
+                        <a class="nav-link" href="/hakkimizda"><%= __('about') %></a>
                     </li>
                 </ul>
             </div>
@@ -24,20 +24,20 @@
             <div class="col d-flex justify-content-end align-items-center">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <a class="nav-link" href="/panel">Etkinlikler</a>
+                        <a class="nav-link" href="/panel"><%= __('events') %></a>
                     </li>
                     <li class="nav-item" id="etkinlikOnayPaneli">
-                        <a class="nav-link" href="/etkinlikOnayPaneli">Etkinlik Onay Paneli</a>
+                        <a class="nav-link" href="/etkinlikOnayPaneli"><%= __('eventsconfirmpage') %></a>
                     </li>
                     <li class="nav-item" id="etkinlikOlustur">
-                        <a class="nav-link" href="/etkinlik-olustur">Etkinlik Oluştur</a>
+                        <a class="nav-link" href="/etkinlik-olustur"><%= __('createevent') %></a>
                     </li>
                 </ul>
                 <% if (loggedin) { %>
                     <%= username %>
-                    <a href="/logout" class="btn btn-dark ms-3">Çıkış Yap</a>
+                    <a href="/logout" class="btn btn-dark ms-3"><%= __('logout') %></a>
                 <% } else { %>
-                    <a href="/login" class="btn btn-dark ms-3">Giriş Yap</a>
+                    <a href="/login" class="btn btn-dark ms-3"><%= __('login') %></a>
                 <% } %>
                 
             </div>
