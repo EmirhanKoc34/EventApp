@@ -33,7 +33,13 @@
                         <a class="nav-link" href="/etkinlik-olustur">Etkinlik Oluştur</a>
                     </li>
                 </ul>
-                <a href="/login" class="btn btn-dark ms-3">Giriş Yap</a>
+                <% if (loggedin) { %>
+                    <%= username %>
+                    <a href="/logout" class="btn btn-dark ms-3">Çıkış Yap</a>
+                <% } else { %>
+                    <a href="/login" class="btn btn-dark ms-3">Giriş Yap</a>
+                <% } %>
+                
             </div>
         </div>
     </div>
