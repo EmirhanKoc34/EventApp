@@ -97,33 +97,39 @@
                     return seatGrid.innerHTML = "<p>Bu etkinlik için tanımlı koltuk bulunamadı.</p>";
                 }
 
-                createGrid(data.map(x => x.seats_ID));
+                createGrid(data);
             } catch (err) {
                 alert("Bir hata oluştu: " + err.message);
             }
         }
 
-        function createGrid(seatIDs) {
+        function createGrid(seats) {
             seatGrid.innerHTML = "";
 
             const rowDiv = document.createElement("div");
             rowDiv.className = "seat-row";
 
-            seatIDs.forEach(seatId => {
+            seats.forEach(seat => {
                 const btn = document.createElement("button");
                 btn.type = "button";
                 btn.className = "seat available";
-                btn.textContent = seatId;
+                btn.textContent = seat.seat_ID;
 
-                btn.addEventListener("click", () => {
+                if(seat.occupied)
+                {
+                    btn.className ="seat unavailable"
+                }
+                else{
+                    btn.addEventListener("click", () => {
                     if (btn.classList.contains("selected")) {
                         btn.classList.remove("selected");
-                        selected.splice(selected.indexOf(seatId), 1);
+                        selected.splice(selected.indexOf(seat.seat_ID), 1);
                     } else {
                         btn.classList.add("selected");
-                        selected.push(seatId);
+                        selected.push(seat.seat_ID);
                     }
                 });
+                }
 
                 rowDiv.appendChild(btn);
             });
@@ -149,8 +155,8 @@
                     });
 
                     if (!res.ok) {
-                        const errMsg = await res.text();
-                        return alert(`Koltuk ${seatID} için bilet alınamadı. Hata: ${errMsg}`);
+                        const errMsg = await res.json();
+                        return alert(`Koltuk ${seatID} için bilet alınamadı. Hata: ${errMsg.message}`);
                     }
                 }
 
