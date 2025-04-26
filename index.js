@@ -58,6 +58,9 @@ const upload = multer({
 const uploadMultiple = upload.array('images', 5); // Up to 5 images
 
 const JWT_SECRET = '7324f7115b13969bb06d94dfb332ef216383aa29700b460a72b3baef689ff6bfdb6aaf1fda8a0adfe0d2111663b49bce5d71ffb43bbbcd115c52a029313bafa6a9188f666b5809b86326529d4d1a0790923d4d613f54913fbfa6b6a3c4d4db5fa37037ccd9ace700fd238b92facf4bc54ec8cf93d8d7fc9fcd6e339656159f4ee5f692bcc6e8e48915e4c0f26fd45b6f6f6df3be0460ca7c0e2ee2cd0029d934b662409a4c57073437e7b7635ce7f6c54ae5298bee463ac6005651238d96e90b821277b9252258b511fb496b8f52fc7081c968b6887e5117d3b96dc40c5348e7b6d525724e89769c0022bb44ae8b642713ffc65fa0fd0db34660d1ffddf72060'; // Change this to a strong secret key
+const JWT_SECRET_FOR_TICKET = '32ef2163aa29700b460a72b3baef383aa297089ff6bfdb6aaf1fda8a0adfe0d115c52a029313bafa6a9188f666b5809b86326529d4d1a0790923d4d613f5491210324f7bbbcd115c115bf692bcc6e8e48915ecc6e8e48915e4c0f26fd45b6f6f6df3be4d8d7fc9fcd6e339656159f4ec143bbbcd115c52a029313bafa6a9188f666b5809b86326529d4d1a0790923d4d613f54913fbfa6b6a3c4d4db5fa37037ccd9ace700fd238b92f2fc7081c968b6887e5117d3b96dc40c5348e7b51238d96e90b821277b9252258b511fb496b8f52fc7086acf4bc54ef1fda8a0adfe0d2111663b49bce5d71ffb43bbbcd115c52a029313bafa6a9188f666b5809b86326529d4d1a0790923d4d613f54913fbfa6b6a3c4d4db5fa37037ccd9ace700fd238b92facf4bc54ec8cf93d8d7fc9fcd6e339656159f4ee5f692bcc6e8e48915e4c0f26fd45b6f6f6df3be0460ca7c0e2ee2cd0029d934b662409a4c5';
+
+
 
 app.set('view engine', 'ejs');
 app.use(express.static(path.join(__dirname, "/public")));
@@ -509,6 +512,33 @@ app.get('/getTickets',isAuthenticated,isHavePriv(2),(req,res)=>// to get all tic
         }
         else{
             res.json({message:"No Tickets Found"});
+        }
+
+    });
+
+});
+
+app.get('/getQrTokenForTicket',isAuthenticated,isHavePriv(2),(req,res)=>
+{
+    let ticketID = req.query.ticketID;
+    let userid = req.user.id;
+
+    //We Have to Check if user is the owner of that ticket
+    let checkQuery ='select * from tickets where tickets_ID = ? AND tickets_User_ID = ?;';
+
+    con.query(checkQuery,[ticketID,userid],(err,checkResult)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to get tickets");
+        }
+        if(checkResult.length > 0)
+        {
+            console.log("tokensend");
+            const token = jwt.sign({ id: ticketID }, JWT_SECRET_FOR_TICKET, { expiresIn: '30s' });
+            res.status(200).json({token: token});
+        }
+        else{
+            res.status(400).json({message: "You are not the owner of this ticket"});
         }
 
     });
