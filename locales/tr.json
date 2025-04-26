@@ -2,7 +2,7 @@
     "settings": "Ayarlar",
     "systemdefault": "Sistem Varsayılanı",
     "chooselang": "Dil Seçiniz",
-    "logout":"Çıkış Yap",
+    "logout": "Çıkış Yap",
     "events": "Etkinlikler",
     "eventsconfirmpage": "Etkinlik Onay Paneli",
     "createevent": "Etkinlik Oluştur",
@@ -34,7 +34,7 @@
     "username": "Kullanıcı Adı",
     "password": "Şifre",
     "fillrequested": "Gerekli Alanları Doldurmalısınız",
-    "signup":"Kayıt Ol",
+    "signup": "Kayıt Ol",
     "passwordagain": "Şifre Yeniden",
     "alreadyaccount": "Zaten hesabınız var mı",
     "eventlist": "Etkinlik Listesi",
@@ -42,5 +42,7 @@
     "date": "Tarih",
     "action": "İşlem",
     "showdetails": "Detayları Göster",
-    "aboutus": "Zes, etkinlik oluşturmayı ve yönetmeyi kolaylaştıran yenilikçi bir platformdur. İster küçük bir buluşma, ister büyük çaplı bir organizasyon planlayın; Zes, etkinliklerinizi hızlı ve pratik bir şekilde düzenlemenize yardımcı olur. Basit arayüzümüz sayesinde etkinlik detaylarını kolayca girer, katılımcılarınızı zahmetsizce yönetirsiniz. Her adımda kullanıcı deneyimini ön planda tutarak, organizasyon sürecinizi sorunsuz hale getiriyoruz. Toplulukları bir araya getiren, paylaşımı ve etkileşimi destekleyen bir sistem olarak Zes, etkinliklerinizi hayata geçirmenin en kolay yoludur."
+    "aboutus": "Zes, etkinlik oluşturmayı ve yönetmeyi kolaylaştıran yenilikçi bir platformdur. İster küçük bir buluşma, ister büyük çaplı bir organizasyon planlayın; Zes, etkinliklerinizi hızlı ve pratik bir şekilde düzenlemenize yardımcı olur. Basit arayüzümüz sayesinde etkinlik detaylarını kolayca girer, katılımcılarınızı zahmetsizce yönetirsiniz. Her adımda kullanıcı deneyimini ön planda tutarak, organizasyon sürecinizi sorunsuz hale getiriyoruz. Toplulukları bir araya getiren, paylaşımı ve etkileşimi destekleyen bir sistem olarak Zes, etkinliklerinizi hayata geçirmenin en kolay yoludur.",
+    "profile": "Profil",
+    "mytickets": "Biletlerim"
 }

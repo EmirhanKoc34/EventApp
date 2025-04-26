@@ -445,24 +445,23 @@ app.post('/getSeats', isAuthenticated, isHavePriv(1), (req, res) => {
         }
         if (allSeats.length > 0) {
             let AlreadyTakenQuery = "select tickets_Seat_ID from tickets where tickets_Event_ID = ?;";
-            con.query(AlreadyTakenQuery,[event_ID],(err,takenSeats)=>
-            {
+            con.query(AlreadyTakenQuery, [event_ID], (err, takenSeats) => {
                 if (err) {
                     return res.status(500).send("Failed Get Seats Data");
                 }
-                    const takenSeatSet = new Set(takenSeats.map(row => row.tickets_Seat_ID));
+                const takenSeatSet = new Set(takenSeats.map(row => row.tickets_Seat_ID));
 
-                    const seatsWithStatus = allSeats.map(seat => ({
-                        seat_ID: seat.seats_ID,
-                        occupied: takenSeatSet.has(seat.seats_ID) ? 1 : 0
-                    }));
-            
-                    return res.json(seatsWithStatus);
-                
+                const seatsWithStatus = allSeats.map(seat => ({
+                    seat_ID: seat.seats_ID,
+                    occupied: takenSeatSet.has(seat.seats_ID) ? 1 : 0
+                }));
+
+                return res.json(seatsWithStatus);
+
             });
 
         }
-        else{
+        else {
             return res.status(404).send("No seats found for this event");
         }
     })
@@ -474,44 +473,40 @@ app.post('/sendTicket', isAuthenticated, isHavePriv(1), (req, res) => {
     let eventID = req.body.eventID;
     let userId = req.user.id;
     let checkQuery = `select * from tickets where tickets_Event_ID = ? AND tickets_Seat_ID = ?`;
-    con.query(checkQuery,[eventID,seatID],(err,checkResult)=>
-    {
+    con.query(checkQuery, [eventID, seatID], (err, checkResult) => {
         if (err) {
             return res.status(500).send("Failed to check tickets");
         }
-        if(checkResult.length === 0)
-        {
+        if (checkResult.length === 0) {
             let query = "INSERT INTO `eventapp`.`tickets` (`tickets_Event_ID`, `tickets_User_ID`, `tickets_Seat_ID`) VALUES (?, ?, ?);";
             con.query(query, [eventID, userId, seatID], (err, result) => {
                 if (err) {
                     return res.status(500).send("Failed to insert into tickets");
                 }
                 res.status(200).json({ message: "Successful" });
-        
+
             });
         }
-        else{
-            res.status(422).json({message:"This seat is taken"});
+        else {
+            res.status(422).json({ message: "This seat is taken" });
         }
 
     });
 });
 
-app.get('/getTickets',isAuthenticated,isHavePriv(2),(req,res)=>// to get all tickets of user
+app.get('/getTickets', isAuthenticated, isHavePriv(2), (req, res) =>// to get all tickets of user
 {
     let userid = req.user.id;
     let query = 'select tickets_ID, tickets_Seat_ID,events.events_ID, events_details.eventName,events_details.eventDate,rooms.rooms_Name  from tickets join events on events.events_ID = tickets.tickets_Event_ID join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where tickets_User_ID = ?;'
-    con.query(query,[userid],(err,result)=>
-    {
+    con.query(query, [userid], (err, result) => {
         if (err) {
             return res.status(500).send("Failed to get tickets");
         }
-        if(result.length > 0)
-        {
+        if (result.length > 0) {
             res.json(result);
         }
-        else{
-            res.json({message:"No Tickets Found"});
+        else {
+            res.json({ message: "No Tickets Found" });
         }
 
     });
@@ -568,14 +563,39 @@ app.post('/isManager', isAuthenticated, isHavePriv(2), (req, res) => {
 });
 
 
-app.get('/profil', isAuthenticated, isHavePriv(1), (req, res) => {
-    res.render('profil', {
-        title: 'Profil',
-        loggedin: !!req.cookies.token,
-        lang: req.cookies.locale,
-        username: req.user ? req.user.username : null
+app.get('/profil', isAuthenticated, (req, res) => {
+    const userID = req.user.id;
+
+    const query = `
+        SELECT 
+            tickets.tickets_ID,
+            events_details.eventName,
+            events_details.eventDate,
+            rooms.rooms_Name,
+            tickets.tickets_Seat_ID
+        FROM tickets
+        JOIN events ON tickets.tickets_Event_ID = events.events_ID
+        JOIN events_details ON events.events_ID = events_details.events_ID
+        JOIN rooms ON events.events_Room_ID = rooms.rooms_ID
+        WHERE tickets.tickets_User_ID = ?
+    `;
+
+    con.query(query, [userID], (err, results) => {
+        if (err) {
+            console.error("Biletleri çekerken hata:", err);
+            return res.status(500).send('Biletler alınamadı.');
+        }
+
+        res.render('profil', {
+            title: 'Profil',
+            lang: req.cookies.locale,
+            loggedin: !!req.cookies.token,
+            username: req.user ? req.user.username : null,
+            tickets: results
+        });
     });
 });
+
 
 
 app.get('/etkinlikOnayPaneli', isAuthenticated, isHavePriv(3), (req, res) => {
@@ -600,7 +620,7 @@ app.get('/etkinlikOnayPaneli/details', isAuthenticated, isHavePriv(3), (req, res
 
 app.get('/etkinlikDetay', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("etkinlik-detay", {
-        title: 'Giriş',
+        title: 'Etkinlik Detay',
         loggedin: !!req.cookies.token,
         lang: req.cookies.locale,
         username: req.user ? req.user.username : null
@@ -609,7 +629,7 @@ app.get('/etkinlikDetay', isAuthenticated, isHavePriv(1), (req, res) => {
 
 app.get('/etkinlik-olustur', isAuthenticated, isHavePriv(2), (req, res) => {
     res.render("etkinlik-olustur", {
-        title: 'Giriş',
+        title: 'Etkinlik Oluştur',
         loggedin: !!req.cookies.token,
         lang: req.cookies.locale,
         username: req.user ? req.user.username : null
@@ -618,7 +638,7 @@ app.get('/etkinlik-olustur', isAuthenticated, isHavePriv(2), (req, res) => {
 
 app.get('/etkinlikKoltukSec', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("koltuk-sec", {
-        title: 'Giriş',
+        title: 'Koltuk Seç',
         loggedin: !!req.cookies.token,
         lang: req.cookies.locale,
         username: req.user ? req.user.username : null
@@ -652,7 +672,7 @@ app.get('/galeri', (req, res) => {
 
 app.get('/hakkimizda', (req, res) => {
     res.render("hakkimizda", {
-        title: 'Giriş',
+        title: 'Hakkımızda',
         loggedin: !!req.cookies.token,
         lang: req.cookies.locale,
         username: req.user ? req.user.username : null
@@ -672,7 +692,7 @@ app.get('/anasayfa', (req, res) => {
 
 app.get('/panel', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("panel", {
-        title: 'Giriş',
+        title: 'Etkinlikler',
         loggedin: !!req.cookies.token,
         lang: req.cookies.locale,
         username: req.user ? req.user.username : null
