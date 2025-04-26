@@ -436,12 +436,31 @@ app.get('/getEventDetails', isAuthenticated, isHavePriv(1), (req, res) => {
 app.post('/getSeats', isAuthenticated, isHavePriv(1), (req, res) => {
     let event_ID = req.body.event_ID;
     let query = 'select seats_ID from rooms join seats on seats_Room_ID = rooms.rooms_ID join events on events.events_Room_ID = rooms.rooms_ID  where events_ID = ?;';
-    con.query(query, [event_ID], (err, result) => {
+    con.query(query, [event_ID], (err, allSeats) => {
         if (err) {
             return res.status(500).send("Failed Get Seats Data");
         }
-        if (result.length > 0) {
-            res.json(result);
+        if (allSeats.length > 0) {
+            let AlreadyTakenQuery = "select tickets_Seat_ID from tickets where tickets_Event_ID = ?;";
+            con.query(AlreadyTakenQuery,[event_ID],(err,takenSeats)=>
+            {
+                if (err) {
+                    return res.status(500).send("Failed Get Seats Data");
+                }
+                    const takenSeatSet = new Set(takenSeats.map(row => row.tickets_Seat_ID));
+
+                    const seatsWithStatus = allSeats.map(seat => ({
+                        seat_ID: seat.seats_ID,
+                        occupied: takenSeatSet.has(seat.seats_ID) ? 1 : 0
+                    }));
+            
+                    return res.json(seatsWithStatus);
+                
+            });
+
+        }
+        else{
+            return res.status(404).send("No seats found for this event");
         }
     })
 
@@ -451,15 +470,49 @@ app.post('/sendTicket', isAuthenticated, isHavePriv(1), (req, res) => {
     let seatID = req.body.seatID;
     let eventID = req.body.eventID;
     let userId = req.user.id;
-
-    let query = "INSERT INTO `eventapp`.`tickets` (`tickets_Event_ID`, `tickets_User_ID`, `tickets_Seat_ID`) VALUES (?, ?, ?);";
-    con.query(query, [eventID, userId, seatID], (err, result) => {
+    let checkQuery = `select * from tickets where tickets_Event_ID = ? AND tickets_Seat_ID = ?`;
+    con.query(checkQuery,[eventID,seatID],(err,checkResult)=>
+    {
         if (err) {
-            return res.status(500).send("Failed to insert into tickets");
+            return res.status(500).send("Failed to check tickets");
         }
-        res.status(200).json({ message: "Successful" });
+        if(checkResult.length === 0)
+        {
+            let query = "INSERT INTO `eventapp`.`tickets` (`tickets_Event_ID`, `tickets_User_ID`, `tickets_Seat_ID`) VALUES (?, ?, ?);";
+            con.query(query, [eventID, userId, seatID], (err, result) => {
+                if (err) {
+                    return res.status(500).send("Failed to insert into tickets");
+                }
+                res.status(200).json({ message: "Successful" });
+        
+            });
+        }
+        else{
+            res.status(422).json({message:"This seat is taken"});
+        }
 
     });
+});
+
+app.get('/getTickets',isAuthenticated,isHavePriv(2),(req,res)=>// to get all tickets of user
+{
+    let userid = req.user.id;
+    let query = 'select tickets_ID, tickets_Seat_ID,events.events_ID, events_details.eventName,events_details.eventDate,rooms.rooms_Name  from tickets join events on events.events_ID = tickets.tickets_Event_ID join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where tickets_User_ID = ?;'
+    con.query(query,[userid],(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to get tickets");
+        }
+        if(result.length > 0)
+        {
+            res.json(result);
+        }
+        else{
+            res.json({message:"No Tickets Found"});
+        }
+
+    });
+
 });
 
 
@@ -688,6 +741,10 @@ function hashPassword(password) {
     // Format the result: uppercase and prepend an asterisk
     return '*' + secondHashHex.toUpperCase();
 }
+
+app.use((req, res) => {// this should always be on the end of the code because if we dont have any route that user entered it will always run this code
+    res.redirect('/anasayfa');
+});
 
 let port = 8001;
 let ip = "0.0.0.0";
