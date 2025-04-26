@@ -1,71 +1,62 @@
-<!DOCTYPE html>
-<html lang="tr">
-<head>
-  <%- include('partials/nav', { title: 'Giriş' }) %>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Etkinlik Onay Paneli</title>
-  <link href="/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet">
-</head>
-<body class="d-flex flex-column min-vh-100">
+<div class="container">
+  <h1 class="text-center mb-5 fw-bold">
+    <%= __('eventsconfirmpage') %>
+  </h1>
 
-  <div class="container">
-    <h1 class="text-center mb-5 fw-bold"><%= __('eventsconfirmpage') %></h1>
-
-    <div id="etkinlik-listesi" class="row gy-4">
-      <!-- Etkinlikler burada dinamik olarak eklenecek -->
-    </div>
-    <div class="mb-5"></div>
+  <div id="etkinlik-listesi" class="row gy-4">
+    <!-- Etkinlikler burada dinamik olarak eklenecek -->
   </div>
+  <div class="mb-5"></div>
+</div>
 
 
-  <script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+<script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
 
-  <script>
-    window.onload = function () {
-      fetch('/getEventsForAdmin')
-        .then(response => response.json())
-        .then(data => {
-          if (Array.isArray(data)) {
-            etkinlikleriGoster(data);
-          } else {
-            console.warn("Etkinlik verisi beklenilen formatta değil:", data);
-          }
-        })
-        .catch(error => {
-          console.error("Etkinlik verileri alınamadı:", error);
-        });
-    }
-  
-    function etkinlikleriGoster(etkinlikler) {
-      const listContainer = document.getElementById('etkinlik-listesi');
-      listContainer.innerHTML = ''; // Önceki içerikleri temizle
-  
-      etkinlikler.forEach(etkinlik => {
-        const etkinlikCol = document.createElement('div');
-        etkinlikCol.classList.add('col-md-6');
-  
-        const card = document.createElement('div');
-        card.classList.add('card', 'shadow-sm', 'h-100');
-  
-        const link = `/etkinlikOnayPaneli/details?eventID=${etkinlik.events_ID}`;
-
-        let durum = etkinlik.approved;
-        let durumBadge = '';
-        let durumText = '';
-
-        if (durum === null) {
-          durumBadge = 'bg-warning text-dark';
-          durumText = "<%= __('waiting') %>";
-        } else if (durum === 0) {
-          durumBadge = 'bg-danger';
-          durumText = "<%= __('rejected') %>";
-        } else if (durum === 1) {
-          durumBadge = 'bg-success';
-          durumText = "<%= __('confirmed') %>";
+<script>
+  window.onload = function () {
+    fetch('/getEventsForAdmin')
+      .then(response => response.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          etkinlikleriGoster(data);
+        } else {
+          console.warn("Etkinlik verisi beklenilen formatta değil:", data);
         }
-  
-        card.innerHTML = `
+      })
+      .catch(error => {
+        console.error("Etkinlik verileri alınamadı:", error);
+      });
+  }
+
+  function etkinlikleriGoster(etkinlikler) {
+    const listContainer = document.getElementById('etkinlik-listesi');
+    listContainer.innerHTML = ''; // Önceki içerikleri temizle
+
+    etkinlikler.forEach(etkinlik => {
+      const etkinlikCol = document.createElement('div');
+      etkinlikCol.classList.add('col-md-6');
+
+      const card = document.createElement('div');
+      card.classList.add('card', 'shadow-sm', 'h-100');
+
+      const link = `/etkinlikOnayPaneli/details?eventID=${etkinlik.events_ID}`;
+
+      let durum = etkinlik.approved;
+      let durumBadge = '';
+      let durumText = '';
+
+      if (durum === null) {
+        durumBadge = 'bg-warning text-dark';
+        durumText = "<%= __('waiting') %>";
+      } else if (durum === 0) {
+        durumBadge = 'bg-danger';
+        durumText = "<%= __('rejected') %>";
+      } else if (durum === 1) {
+        durumBadge = 'bg-success';
+        durumText = "<%= __('confirmed') %>";
+      }
+
+      card.innerHTML = `
         <a href="${link}" class="text-decoration-none text-dark">
           <div class="card-body">
             <h5 class="card-title">${etkinlik.eventName}</h5>
@@ -76,25 +67,19 @@
           </div>
         </a>
       `;
-        etkinlikCol.appendChild(card);
-        listContainer.appendChild(etkinlikCol);
-      });
-    }
-  
-    function formatTarih(dateStr) {
-      const tarih = new Date(dateStr);
-      return tarih.toLocaleDateString('tr-TR', {
-        year: 'numeric',
-        month: 'long',
-        day: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-      });
-    }
-  </script>
-  
-  
+      etkinlikCol.appendChild(card);
+      listContainer.appendChild(etkinlikCol);
+    });
+  }
 
-  <%- include('partials/footer', { title: 'Giriş' }) %>
-</body>
-</html>
+  function formatTarih(dateStr) {
+    const tarih = new Date(dateStr);
+    return tarih.toLocaleDateString('tr-TR', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+</script>

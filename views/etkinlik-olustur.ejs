@@ -1,58 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
-</head>
-
-<body class="d-flex flex-column min-vh-100">
-    <%- include('partials/nav') %>
-
-
-        <div class="container mt-5">
-            <div class="card shadow-lg p-4">
-                <h3 class="text-center mb-4"><%= __('createevent') %></h3>
-                <form action="/createEvent" method="POST" enctype="multipart/form-data">
-                    <div class="mb-3">
-                        <label for="eventName" class="form-label"><%= __('eventname') %></label>
-                        <input type="text" class="form-control" name="eventName" id="eventName" required>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="description" class="form-label"><%= __('description') %></label>
-                        <textarea class="form-control" name="description" id="description" rows="4" required></textarea>
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="timestamp" class="form-label"><%= __('time') %> <small class="text-muted">(YYYY-MM-DD
-                                HH:MM:SS)</small></label>
-                        <input type="datetime-local" class="form-control" name="timestamp" id="timestamp" required>
-
-                    </div>
-
-                    <div class="mb-3">
-                        <label for="roomid" class="form-label"><%= __('choosehall') %></label>
-                        <select class="form-select" name="roomid" id="roomid" required>
-                            <option value=""><%= __('hallloading') %>...</option>
-                        </select>
-                    </div>
-                    
-
-                    <div class="mb-3">
-                        <label for="images" class="form-label"><%= __('imagesoptional') %></label>
-                        <input class="form-control" type="file" name="images" id="images" multiple accept="image/*">
-                    </div>
-
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary px-4"><%= __('submit') %></button>
-                    </div>
-                </form>
+<div class="container mt-5">
+    <div class="card shadow-lg p-4">
+        <h3 class="text-center mb-4">
+            <%= __('createevent') %>
+        </h3>
+        <form action="/createEvent" method="POST" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="eventName" class="form-label">
+                    <%= __('eventname') %>
+                </label>
+                <input type="text" class="form-control" name="eventName" id="eventName" required>
             </div>
-        </div>
-        <%- include('partials/footer') %>
-</body>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">
+                    <%= __('description') %>
+                </label>
+                <textarea class="form-control" name="description" id="description" rows="4" required></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="timestamp" class="form-label">
+                    <%= __('time') %> <small class="text-muted">(YYYY-MM-DD
+                            HH:MM:SS)</small>
+                </label>
+                <input type="datetime-local" class="form-control" name="timestamp" id="timestamp" required>
+
+            </div>
+
+            <div class="mb-3">
+                <label for="roomid" class="form-label">
+                    <%= __('choosehall') %>
+                </label>
+                <select class="form-select" name="roomid" id="roomid" required>
+                    <option value="">
+                        <%= __('hallloading') %>...
+                    </option>
+                </select>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="images" class="form-label">
+                    <%= __('imagesoptional') %>
+                </label>
+                <input class="form-control" type="file" name="images" id="images" multiple accept="image/*">
+            </div>
+
+            <div class="text-center">
+                <button type="submit" class="btn btn-primary px-4">
+                    <%= __('submit') %>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
 
 <script>
     document.addEventListener("DOMContentLoaded", () => {
@@ -62,33 +64,30 @@
                 'Content-Type': 'application/json'
             }
         })
-        .then(res => res.json())
-        .then(data => {
-            const select = document.getElementById('roomid');
-            select.innerHTML = ''; // Eski "yükleniyor" mesajını temizle
+            .then(res => res.json())
+            .then(data => {
+                const select = document.getElementById('roomid');
+                select.innerHTML = ''; // Eski "yükleniyor" mesajını temizle
 
-            data.forEach(room => {
-                const option = document.createElement('option');
-                option.value = room.rooms_ID;
-                option.textContent = room.rooms_Name;
-                select.appendChild(option);
+                data.forEach(room => {
+                    const option = document.createElement('option');
+                    option.value = room.rooms_ID;
+                    option.textContent = room.rooms_Name;
+                    select.appendChild(option);
+                });
+
+                // Eğer hiç salon yoksa
+                if (data.length === 0) {
+                    const option = document.createElement('option');
+                    option.value = '';
+                    option.textContent = 'Salon bulunamadı';
+                    select.appendChild(option);
+                }
+            })
+            .catch(err => {
+                console.error('Salonlar alınamadı:', err);
+                const select = document.getElementById('roomid');
+                select.innerHTML = '<option value="">Salonlar yüklenemedi</option>';
             });
-
-            // Eğer hiç salon yoksa
-            if (data.length === 0) {
-                const option = document.createElement('option');
-                option.value = '';
-                option.textContent = 'Salon bulunamadı';
-                select.appendChild(option);
-            }
-        })
-        .catch(err => {
-            console.error('Salonlar alınamadı:', err);
-            const select = document.getElementById('roomid');
-            select.innerHTML = '<option value="">Salonlar yüklenemedi</option>';
-        });
     });
 </script>
-
-
-</html>

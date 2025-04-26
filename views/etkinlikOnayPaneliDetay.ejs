@@ -1,130 +1,120 @@
-<!DOCTYPE html>
-<html lang="tr">
+<div class="container mt-5">
+    <div id="event-container" class="card shadow-lg p-5 rounded-4">
+        <h2 id="event-name" class="text-center mb-5">
+            <%= __('loading') %>...
+        </h2>
 
-<head>
-    <meta charset="UTF-8" />
-    <title>Etkinlik Detay</title>
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
-</head>
+        <!-- Etkinlik Bilgileri -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
 
-<body class="d-flex flex-column min-vh-100 bg-light">
-    <%- include('partials/nav') %>
-
-        <div class="container mt-5">
-            <div id="event-container" class="card shadow-lg p-5 rounded-4">
-                <h2 id="event-name" class="text-center mb-5"><%= __('loading') %>...</h2>
-
-                <!-- Etkinlik Bilgileri -->
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-
-                        <div class="mb-4">
-                            <h5 class="fw-bold text-primary">📅 <%= __('time') %></h5>
-                            <div id="event-date" class="p-3 bg-white border rounded shadow-sm text-dark"></div>
-                        </div>
-
-                        <div class="mb-4">
-                            <h5 class="fw-bold text-primary">📝 <%= __('description') %></h5>
-                            <div id="event-desc" class="p-3 bg-white border rounded shadow-sm text-dark"
-                                style="white-space: pre-line;"></div>
-                        </div>
-
-                        <div class="mb-4">
-                            <h5 class="fw-bold text-primary">🏛️ <%= __('hall') %></h5>
-                            <div id="event-room" class="p-3 bg-white border rounded shadow-sm text-dark"></div>
-                        </div>
-
-                    </div>
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary">📅 <%= __('time') %>
+                    </h5>
+                    <div id="event-date" class="p-3 bg-white border rounded shadow-sm text-dark"></div>
                 </div>
 
-                <!-- Görseller -->
-                <div id="event-images" class="row mt-5 g-3 justify-content-center"></div>
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary">📝 <%= __('description') %>
+                    </h5>
+                    <div id="event-desc" class="p-3 bg-white border rounded shadow-sm text-dark"
+                        style="white-space: pre-line;"></div>
+                </div>
 
-                <!-- Butonlar -->
-                <div class="text-center mt-4" id="action-buttons"></div>
+                <div class="mb-4">
+                    <h5 class="fw-bold text-primary">🏛️ <%= __('hall') %>
+                    </h5>
+                    <div id="event-room" class="p-3 bg-white border rounded shadow-sm text-dark"></div>
+                </div>
+
             </div>
         </div>
 
-        <%- include('partials/footer') %>
+        <!-- Görseller -->
+        <div id="event-images" class="row mt-5 g-3 justify-content-center"></div>
 
-            <script>
-                document.addEventListener("DOMContentLoaded", () => {
-                    const params = new URLSearchParams(window.location.search);
-                    const eventId = params.get('eventID');
-                    const container = document.getElementById("event-container");
+        <!-- Butonlar -->
+        <div class="text-center mt-4" id="action-buttons"></div>
+    </div>
+</div>
 
-                    if (!eventId) {
-                        container.innerHTML = "<p>Etkinlik ID bulunamadı.</p>";
-                        return;
-                    }
 
-                    fetch(`/getEventDetails?event_ID=${eventId}`)
-                        .then(res => res.json())
-                        .then(data => {
-                            if (data.err) {
-                                container.innerHTML = `<p>${data.err}</p>`;
-                                return;
-                            }
 
-                            document.getElementById("event-name").innerText = data.eventName;
-                            document.getElementById("event-date").innerText = data.eventDate;
-                            document.getElementById("event-desc").innerText = data.eventDescription;
-                            document.getElementById("event-room").innerText = data.rooms_Name;
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        const params = new URLSearchParams(window.location.search);
+        const eventId = params.get('eventID');
+        const container = document.getElementById("event-container");
 
-                            const imageContainer = document.getElementById("event-images");
-                            if (data.imagePaths && data.imagePaths.length > 0) {
-                                data.imagePaths.forEach(path => {
-                                    const col = document.createElement("div");
-                                    col.className = "col-md-4";
-                                    col.innerHTML = `
+        if (!eventId) {
+            container.innerHTML = "<p>Etkinlik ID bulunamadı.</p>";
+            return;
+        }
+
+        fetch(`/getEventDetails?event_ID=${eventId}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.err) {
+                    container.innerHTML = `<p>${data.err}</p>`;
+                    return;
+                }
+
+                document.getElementById("event-name").innerText = data.eventName;
+                document.getElementById("event-date").innerText = data.eventDate;
+                document.getElementById("event-desc").innerText = data.eventDescription;
+                document.getElementById("event-room").innerText = data.rooms_Name;
+
+                const imageContainer = document.getElementById("event-images");
+                if (data.imagePaths && data.imagePaths.length > 0) {
+                    data.imagePaths.forEach(path => {
+                        const col = document.createElement("div");
+                        col.className = "col-md-4";
+                        col.innerHTML = `
                 <div class="card shadow-sm border-0 h-100">
                   <img src="/${path}" class="card-img-top rounded-3" alt="Etkinlik Görseli">
                 </div>`;
-                                    imageContainer.appendChild(col);
-                                });
-                            }
+                        imageContainer.appendChild(col);
+                    });
+                }
 
-                            const actionWrapper = document.getElementById("action-buttons");
+                const actionWrapper = document.getElementById("action-buttons");
 
-                            const approveBtn = document.createElement("button");
-                            approveBtn.className = "btn btn-success me-2 px-4";
-                            approveBtn.innerText = "<%= __('confirm') %>";
-                            approveBtn.onclick = () => sendAnswer(1);
+                const approveBtn = document.createElement("button");
+                approveBtn.className = "btn btn-success me-2 px-4";
+                approveBtn.innerText = "<%= __('confirm') %>";
+                approveBtn.onclick = () => sendAnswer(1);
 
-                            const rejectBtn = document.createElement("button");
-                            rejectBtn.className = "btn btn-danger px-4";
-                            rejectBtn.innerText = "<%= __('reject') %>";
-                            rejectBtn.onclick = () => sendAnswer(0);
+                const rejectBtn = document.createElement("button");
+                rejectBtn.className = "btn btn-danger px-4";
+                rejectBtn.innerText = "<%= __('reject') %>";
+                rejectBtn.onclick = () => sendAnswer(0);
 
-                            actionWrapper.appendChild(approveBtn);
-                            actionWrapper.appendChild(rejectBtn);
-                        })
-                        .catch(err => {
-                            container.innerHTML = `<p class="text-danger">Veri alınırken hata oluştu: ${err}</p>`;
-                        });
+                actionWrapper.appendChild(approveBtn);
+                actionWrapper.appendChild(rejectBtn);
+            })
+            .catch(err => {
+                container.innerHTML = `<p class="text-danger">Veri alınırken hata oluştu: ${err}</p>`;
+            });
 
-                    function sendAnswer(answer) {
-                        fetch('/sendAnswerForAdmin', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                answer: answer,
-                                events_ID: eventId,
-                            }),
-                        })
-                            .then(res => res.json())
-                            .then(data => {
-                                alert(data.message || "Durum güncellendi.");
-                                window.location.href = "/etkinlikOnayPaneli";
-                            })
-                            .catch(err => {
-                                alert("Bir hata oluştu: " + err.message);
-                            });
-                    }
+        function sendAnswer(answer) {
+            fetch('/sendAnswerForAdmin', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    answer: answer,
+                    events_ID: eventId,
+                }),
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message || "Durum güncellendi.");
+                    window.location.href = "/etkinlikOnayPaneli";
+                })
+                .catch(err => {
+                    alert("Bir hata oluştu: " + err.message);
                 });
-            </script>
-</body>
-
-</html>
+        }
+    });
+</script>

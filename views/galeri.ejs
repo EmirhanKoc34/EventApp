@@ -1,42 +1,23 @@
-<!DOCTYPE html>
-<html lang="tr">
+<style>
+    .gallery-img {
+        object-fit: cover;
+        height: 250px;
+        transition: transform 0.3s ease;
+    }
 
-<head>
-    <meta charset="UTF-8" />
-    <title>Galeri</title>
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
-    <style>
-        .gallery-img {
-            object-fit: cover;
-            height: 250px;
-            transition: transform 0.3s ease;
-        }
+    .gallery-img:hover {
+        transform: scale(1.05);
+    }
+</style>
 
-        .gallery-img:hover {
-            transform: scale(1.05);
-        }
-    </style>
-</head>
-
-<body class="bg-light d-flex flex-column min-vh-100">
-    <%- include('partials/nav') %>
-
-        <div class="container my-5">
-            <h2 class="text-center mb-4">📸 <%= __('gallery') %></h2>
-            <div class="row g-4">
-                <% images.forEach(image=> { %>
-                    <div class="col-md-4 col-sm-6">
-                        <div class="card shadow-sm border-0">
-                            <img src="/images/galeri/<%= image %>" class="card-img-top gallery-img rounded-3"
-                                alt="Galeri Görseli">
-
-                        </div>
-                    </div>
-                    <% }) %>
+<h2 class="text-center mb-4">📸 <%= __('gallery') %>
+</h2>
+<div class="row g-4">
+    <% images.forEach(image=> { %>
+        <div class="col-md-4 col-sm-6">
+            <div class="card shadow-sm border-0">
+                <img src="/images/galeri/<%= image %>" class="card-img-top gallery-img rounded-3" alt="Galeri Görseli">
             </div>
         </div>
-
-        <%- include('partials/footer') %>
-</body>
-
-</html>
+        <% }) %>
+</div>

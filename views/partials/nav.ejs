@@ -1,10 +1,46 @@
 <meta charset="UTF-8">
-<nav class="navbar navbar-expand-lg custom-navbar" data-bs-theme="light">
-    <div class="container">
-        <div class="row w-100 align-items-center">
-            <!-- Sol tarafta linkler -->
-            <div class="col d-flex justify-content-start">
-                <ul class="navbar-nav">
+<nav class="navbar navbar-expand-lg custom-navbar bg-white shadow-sm position-relative py-3 mb-3" data-bs-theme="light">
+    <div class="container-fluid px-4">
+
+        <style>
+            .navbar-nav .nav-link {
+                transition: all 0.3s ease;
+                border-radius: 6px;
+                padding: 6px 10px;
+            }
+
+            .navbar-nav .nav-link:hover {
+                background-color: #f8f9fa;
+                color: #0d6efd;
+                text-decoration: none;
+            }
+
+            .navbar-nav .btn-outline-dark:hover,
+            .navbar-nav .btn-outline-secondary:hover {
+                background-color: #0d6efd !important;
+                color: #fff !important;
+                border-color: #0d6efd !important;
+                transition: all 0.3s ease;
+            }
+
+            #langOptions a:hover {
+                background-color: #f8f9fa;
+                color: #0d6efd;
+                text-decoration: none;
+            }
+        </style>
+
+        <!-- Toggler Butonu -->
+        <button class="navbar-toggler ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent"
+            aria-controls="navbarContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse w-100" id="navbarContent">
+            <div class="d-flex flex-column flex-lg-row w-100 justify-content-between align-items-lg-center gap-3">
+
+                <!-- Sol Menü -->
+                <ul class="navbar-nav d-flex flex-column flex-lg-row gap-2">
                     <li class="nav-item">
                         <a class="nav-link" href="/galeri">
                             <%= __('gallery') %>
@@ -15,27 +51,23 @@
                             <%= __('about') %>
                         </a>
                     </li>
-                </ul>
-            </div>
-
-            <!-- Ortada logo -->
-            <div class="col d-flex justify-content-center">
-                <a class="navbar-brand" href="/anasayfa">
-                    <img src="/images/logo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top">
-                </a>
-            </div>
-
-            <!-- Sağ tarafta -->
-            <div class="col d-flex justify-content-end align-items-center">
-                <ul class="navbar-nav">
-                    <li class="nav-item">
-                        <a class="nav-link" href="/panel">
-                            <%= __('events') %>
-                        </a>
-                    </li>
                     <li class="nav-item" id="etkinlikOnayPaneli">
                         <a class="nav-link" href="/etkinlikOnayPaneli">
                             <%= __('eventsconfirmpage') %>
+                        </a>
+                    </li>
+                </ul>
+
+                <!-- Ortadaki Logo -->
+                <a class="navbar-brand position-absolute start-50 translate-middle-x" href="/anasayfa"
+                    style="z-index: 10;">
+                    <img src="/images/logo.png" alt="Logo" width="50" height="50" class="d-inline-block align-text-top">
+                </a>
+
+                <ul class="navbar-nav d-flex flex-column flex-lg-row align-items-lg-center gap-2">
+                    <li class="nav-item">
+                        <a class="nav-link" href="/panel">
+                            <%= __('events') %>
                         </a>
                     </li>
                     <li class="nav-item" id="etkinlikOlustur">
@@ -43,41 +75,47 @@
                             <%= __('createevent') %>
                         </a>
                     </li>
+
+                    <% if (loggedin) { %>
+                        <li class="nav-item">
+                            <a class="nav-link fw-semibold text-dark" href="/profil">
+                                <%= username %>
+                            </a>
+
+                        </li>
+                        <li class="nav-item">
+                            <a href="/logout" class="btn btn-outline-dark btn-sm ms-lg-2">
+                                <%= __('logout') %>
+                            </a>
+                        </li>
+                        <% } else { %>
+                            <li class="nav-item">
+                                <a href="/login" class="btn btn-outline-dark btn-sm ms-lg-2">
+                                    <%= __('login') %>
+                                </a>
+                            </li>
+                            <% } %>
+
+                                <!-- 🌐 DİL MENÜSÜ (artık yapışık değil) -->
+                                <li
+                                    class="nav-item d-flex flex-column align-items-start align-items-lg-center mt-2 mt-lg-0">
+                                    <div class="position-relative" id="langDropdown">
+                                        <button onclick="toggleLangMenu()" class="btn btn-outline-secondary btn-sm">
+                                            🌐 <%= __('lang') %>
+                                        </button>
+                                        <div id="langOptions"
+                                            class="position-absolute bg-white border rounded mt-2 py-1 shadow-sm"
+                                            style="display:none; right:0; min-width:120px; z-index:999;">
+                                            <a href="#" onclick="setLang('tr')"
+                                                class="d-block py-1 px-3 text-dark <%= lang === 'tr' ? 'fw-bold text-primary' : '' %>">Türkçe</a>
+                                            <a href="#" onclick="setLang('en')"
+                                                class="d-block py-1 px-3 text-dark <%= lang === 'en' ? 'fw-bold text-primary' : '' %>">English</a>
+                                        </div>
+                                    </div>
+                                </li>
                 </ul>
 
-                <!-- Giriş/Çıkış -->
-                <% if (loggedin) { %>
-                    <span class="ms-3">
-                        <%= username %>
-                    </span>
-                    <a href="/logout" class="btn btn-dark ms-3">
-                        <%= __('logout') %>
-                    </a>
-                    <% } else { %>
-                        <a href="/login" class="btn btn-dark ms-3">
-                            <%= __('login') %>
-                        </a>
-                        <% } %>
 
-                            <!-- Dil Menüsü -->
-                            <div class="ms-3 position-relative" id="langDropdown">
-                                <button onclick="toggleLangMenu()" class="btn btn-outline-secondary">🌐 <%= __('lang')
-                                        %></button>
-                                <div id="langOptions" class="position-absolute bg-white border rounded mt-1 p-2 shadow"
-                                    style="display:none; right:0; min-width:120px; z-index:999;">
-                                    <div>
-                                        <a href="#" onclick="setLang('tr')"
-                                            class="d-block py-1 px-2 <%= lang === 'tr' ? 'fw-bold text-primary' : '' %>">
-                                            Türkçe</a>
-                                        <a href="#" onclick="setLang('en')"
-                                            class="d-block py-1 px-2 <%= lang === 'en' ? 'fw-bold text-primary' : '' %>">
-                                            English</a>
-                                    </div>
-                                </div>
-                            </div>
-            </div>
-        </div>
-    </div>
 </nav>
 
 <script>

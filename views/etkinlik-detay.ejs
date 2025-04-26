@@ -1,93 +1,85 @@
-<!DOCTYPE html>
-<html lang="tr">
+<div class="container mt-5">
+    <div id="event-container" class="card shadow-lg p-5 rounded-4">
+        <h2 id="event-name" class="text-center mb-4">
+            <%= __('loading') %>...
+        </h2>
 
-<head>
-    <meta charset="UTF-8" />
-    <title>Etkinlik Detay</title>
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
-</head>
+        <!-- Etkinlik Bilgileri -->
+        <div class="row justify-content-center">
+            <div class="col-md-8">
 
-<body class="d-flex flex-column min-vh-100 bg-light">
-    <%- include('partials/nav') %>
+                <ul class="list-group list-group-flush fs-5 mb-4">
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span class="fw-semibold text-secondary">
+                            <%= __('date') %>:
+                        </span>
+                        <span id="event-date"></span>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between">
+                        <span class="fw-semibold text-secondary">
+                            <%= __('hall') %>:
+                        </span>
+                        <span id="event-room"></span>
+                    </li>
+                </ul>
 
-        <div class="container mt-5">
-            <div id="event-container" class="card shadow-lg p-5 rounded-4">
-                <h2 id="event-name" class="text-center mb-4"><%= __('loading') %>...</h2>
-
-                <!-- Etkinlik Bilgileri -->
-                <div class="row justify-content-center">
-                    <div class="col-md-8">
-
-                        <ul class="list-group list-group-flush fs-5 mb-4">
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span class="fw-semibold text-secondary"><%= __('date') %>:</span>
-                                <span id="event-date"></span>
-                            </li>
-                            <li class="list-group-item d-flex justify-content-between">
-                                <span class="fw-semibold text-secondary"><%= __('hall') %>:</span>
-                                <span id="event-room"></span>
-                            </li>
-                        </ul>
-
-                        <!-- Açıklama Kutusu -->
-                        <div class="mb-4">
-                            <h5 class="text-secondary fw-semibold"><%= __('description') %>:</h5>
-                            <div id="event-desc" class="p-3 bg-white border rounded-3 shadow-sm text-dark"
-                                style="white-space: pre-line;"></div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Görseller -->
-                <div id="event-images" class="row mt-4 g-3 justify-content-center"></div>
-
-                <!-- Bilet Al -->
-                <div class="text-center mt-4">
-                    <a id="ticket-link" href="#" class="btn btn-success btn-lg px-5">🎫 <%= __('buyticket') %></a>
+                <!-- Açıklama Kutusu -->
+                <div class="mb-4">
+                    <h5 class="text-secondary fw-semibold">
+                        <%= __('description') %>:
+                    </h5>
+                    <div id="event-desc" class="p-3 bg-white border rounded-3 shadow-sm text-dark"
+                        style="white-space: pre-line;"></div>
                 </div>
             </div>
         </div>
 
-        <%- include('partials/footer') %>
+        <!-- Görseller -->
+        <div id="event-images" class="row mt-4 g-3 justify-content-center"></div>
 
-            <script>
-                const urlParams = new URLSearchParams(window.location.search);
-                const eventId = urlParams.get("event_ID");
+        <!-- Bilet Al -->
+        <div class="text-center mt-4">
+            <a id="ticket-link" href="#" class="btn btn-success btn-lg px-5">🎫 <%= __('buyticket') %></a>
+        </div>
+    </div>
+</div>
 
-                fetch(`/getEventDetails?event_ID=${eventId}`)
-                    .then(res => res.json())
-                    .then(data => {
-                        if (data.err) {
-                            document.getElementById('event-container').innerHTML = '<p>Etkinlik bulunamadı.</p>';
-                            return;
-                        }
 
-                        document.getElementById('event-name').innerText = data.eventName;
-                        document.getElementById('event-date').innerText = data.eventDate;
-                        document.getElementById('event-desc').innerText = data.eventDescription;
-                        document.getElementById('event-room').innerText = data.rooms_Name;
-                        document.getElementById('ticket-link').href = `/etkinlikKoltukSec?eventID=${data.events_ID}`;
+<script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventId = urlParams.get("event_ID");
 
-                        const imagesDiv = document.getElementById('event-images');
-                        if (data.imagePaths.length === 0) {
-                            imagesDiv.innerHTML = "<p class='text-center text-muted'>Etkinliğe ait görsel bulunamadı.</p>";
-                        } else {
-                            data.imagePaths.forEach(path => {
-                                const col = document.createElement("div");
-                                col.className = "col-md-4";
-                                col.innerHTML = `
+    fetch(`/getEventDetails?event_ID=${eventId}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.err) {
+                document.getElementById('event-container').innerHTML = '<p>Etkinlik bulunamadı.</p>';
+                return;
+            }
+
+            document.getElementById('event-name').innerText = data.eventName;
+            document.getElementById('event-date').innerText = data.eventDate;
+            document.getElementById('event-desc').innerText = data.eventDescription;
+            document.getElementById('event-room').innerText = data.rooms_Name;
+            document.getElementById('ticket-link').href = `/etkinlikKoltukSec?eventID=${data.events_ID}`;
+
+            const imagesDiv = document.getElementById('event-images');
+            if (data.imagePaths.length === 0) {
+                imagesDiv.innerHTML = "<p class='text-center text-muted'>Etkinliğe ait görsel bulunamadı.</p>";
+            } else {
+                data.imagePaths.forEach(path => {
+                    const col = document.createElement("div");
+                    col.className = "col-md-4";
+                    col.innerHTML = `
                             <div class="card border-0 shadow-sm h-100">
                                 <img src="/${path}" class="card-img-top rounded-3" alt="Etkinlik Görseli">
                             </div>`;
-                                imagesDiv.appendChild(col);
-                            });
-                        }
-                    })
-                    .catch(err => {
-                        console.error("Hata:", err);
-                        document.getElementById('event-container').innerHTML = '<p class="text-danger">Veri alınamadı.</p>';
-                    });
-            </script>
-</body>
-
-</html>
+                    imagesDiv.appendChild(col);
+                });
+            }
+        })
+        .catch(err => {
+            console.error("Hata:", err);
+            document.getElementById('event-container').innerHTML = '<p class="text-danger">Veri alınamadı.</p>';
+        });
+</script>

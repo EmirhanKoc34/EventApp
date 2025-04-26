@@ -1,172 +1,161 @@
-<!DOCTYPE html>
-<html lang="tr">
+<style>
+    body {
+        background-color: #f8f9fa;
+        font-family: 'Segoe UI', sans-serif;
+    }
 
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Koltuk Seçimi</title>
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css" />
-    <style>
-        body {
-            background-color: #f8f9fa;
-            font-family: 'Segoe UI', sans-serif;
+    .seat {
+        width: 70px;
+        height: 70px;
+        font-size: 0.9rem;
+        font-weight: 500;
+        line-height: 70px;
+        padding: 0;
+        border-radius: 5px;
+        border: none;
+        color: white;
+        margin: 5px;
+    }
+
+    .available {
+        background-color: #198754;
+    }
+
+    .selected {
+        background-color: #0d6efd;
+    }
+
+    .unavailable {
+        background-color: #dc3545;
+        pointer-events: none;
+    }
+
+    .seat-row {
+        display: flex;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .action-buttons {
+        margin-top: 30px;
+    }
+</style>
+
+<div class="container text-center">
+    <h2 class="mb-4">
+        <%= __('chooseseat') %>
+    </h2>
+
+    <form id="ticketForm">
+        <div id="seat-grid" class="mb-4">
+            <!-- Koltuklar burada oluşturulacak -->
+        </div>
+
+        <div class="action-buttons">
+            <button type="submit" class="btn btn-success me-2">
+                <%= __('confirm') %>
+            </button>
+            <a href="/" class="btn btn-secondary">
+                <%= __('cancel') %>
+            </a>
+        </div>
+    </form>
+</div>
+
+<script>
+    const seatGrid = document.getElementById("seat-grid");
+    const selected = [];
+    const eventID = new URLSearchParams(window.location.search).get("eventID");
+
+    if (!eventID) {
+        alert("Etkinlik ID'si belirtilmedi.");
+    }
+
+    async function fetchSeats() {
+        try {
+            const res = await fetch("/getSeats", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ event_ID: eventID })
+            });
+
+            if (!res.ok) {
+                return alert("Koltuk verileri alınamadı.");
+            }
+
+            const data = await res.json();
+
+            if (!data.length) {
+                return seatGrid.innerHTML = "<p>Bu etkinlik için tanımlı koltuk bulunamadı.</p>";
+            }
+
+            createGrid(data.map(x => x.seats_ID));
+        } catch (err) {
+            alert("Bir hata oluştu: " + err.message);
+        }
+    }
+
+    function createGrid(seatIDs) {
+        seatGrid.innerHTML = "";
+
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "seat-row";
+
+        seatIDs.forEach(seatId => {
+            const btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "seat available";
+            btn.textContent = seatId;
+
+            btn.addEventListener("click", () => {
+                if (btn.classList.contains("selected")) {
+                    btn.classList.remove("selected");
+                    selected.splice(selected.indexOf(seatId), 1);
+                } else {
+                    btn.classList.add("selected");
+                    selected.push(seatId);
+                }
+            });
+
+            rowDiv.appendChild(btn);
+        });
+
+        seatGrid.appendChild(rowDiv);
+    }
+
+    async function submitTickets(e) {
+        e.preventDefault();
+
+        if (!selected.length) {
+            return alert("Lütfen en az bir koltuk seçiniz.");
         }
 
-        .seat {
-            width: 70px;
-            height: 70px;
-            font-size: 0.9rem;
-            font-weight: 500;
-            line-height: 70px;
-            padding: 0;
-            border-radius: 5px;
-            border: none;
-            color: white;
-            margin: 5px;
-        }
-
-        .available {
-            background-color: #198754;
-        }
-
-        .selected {
-            background-color: #0d6efd;
-        }
-
-        .unavailable {
-            background-color: #dc3545;
-            pointer-events: none;
-        }
-
-        .seat-row {
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .action-buttons {
-            margin-top: 30px;
-        }
-    </style>
-</head>
-
-<body class="d-flex flex-column min-vh-100">
-    <%- include('partials/nav') %>
-
-    <div class="container text-center">
-        <h2 class="mb-4"><%= __('chooseseat') %></h2>
-
-        <form id="ticketForm">
-            <div id="seat-grid" class="mb-4">
-                <!-- Koltuklar burada oluşturulacak -->
-            </div>
-
-            <div class="action-buttons">
-                <button type="submit" class="btn btn-success me-2"><%= __('confirm') %></button>
-                <a href="/" class="btn btn-secondary"><%= __('cancel') %></a>
-            </div>
-        </form>
-    </div>
-
-    <script>
-        const seatGrid = document.getElementById("seat-grid");
-        const selected = [];
-        const eventID = new URLSearchParams(window.location.search).get("eventID");
-
-        if (!eventID) {
-            alert("Etkinlik ID'si belirtilmedi.");
-        }
-
-        async function fetchSeats() {
-            try {
-                const res = await fetch("/getSeats", {
+        try {
+            for (const seatID of selected) {
+                const res = await fetch("/sendTicket", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({ event_ID: eventID })
+                    body: JSON.stringify({ seatID, eventID })
                 });
 
                 if (!res.ok) {
-                    return alert("Koltuk verileri alınamadı.");
+                    const errMsg = await res.text();
+                    return alert(`Koltuk ${seatID} için bilet alınamadı. Hata: ${errMsg}`);
                 }
-
-                const data = await res.json();
-
-                if (!data.length) {
-                    return seatGrid.innerHTML = "<p>Bu etkinlik için tanımlı koltuk bulunamadı.</p>";
-                }
-
-                createGrid(data.map(x => x.seats_ID));
-            } catch (err) {
-                alert("Bir hata oluştu: " + err.message);
-            }
-        }
-
-        function createGrid(seatIDs) {
-            seatGrid.innerHTML = "";
-
-            const rowDiv = document.createElement("div");
-            rowDiv.className = "seat-row";
-
-            seatIDs.forEach(seatId => {
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "seat available";
-                btn.textContent = seatId;
-
-                btn.addEventListener("click", () => {
-                    if (btn.classList.contains("selected")) {
-                        btn.classList.remove("selected");
-                        selected.splice(selected.indexOf(seatId), 1);
-                    } else {
-                        btn.classList.add("selected");
-                        selected.push(seatId);
-                    }
-                });
-
-                rowDiv.appendChild(btn);
-            });
-
-            seatGrid.appendChild(rowDiv);
-        }
-
-        async function submitTickets(e) {
-            e.preventDefault();
-
-            if (!selected.length) {
-                return alert("Lütfen en az bir koltuk seçiniz.");
             }
 
-            try {
-                for (const seatID of selected) {
-                    const res = await fetch("/sendTicket", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ seatID, eventID })
-                    });
-
-                    if (!res.ok) {
-                        const errMsg = await res.text();
-                        return alert(`Koltuk ${seatID} için bilet alınamadı. Hata: ${errMsg}`);
-                    }
-                }
-
-                alert("Biletler başarıyla alındı.");
-                window.location.href = "/";
-            } catch (err) {
-                alert("Bir hata oluştu: " + err.message);
-            }
+            alert("Biletler başarıyla alındı.");
+            window.location.href = "/";
+        } catch (err) {
+            alert("Bir hata oluştu: " + err.message);
         }
+    }
 
-        document.getElementById("ticketForm").addEventListener("submit", submitTickets);
+    document.getElementById("ticketForm").addEventListener("submit", submitTickets);
 
-        fetchSeats();
-    </script>
-
-    <%- include('partials/footer') %>
-</body>
-
-</html>
+    fetchSeats();
+</script>
