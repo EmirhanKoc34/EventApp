@@ -533,14 +533,39 @@ app.post('/isManager', isAuthenticated, isHavePriv(2), (req, res) => {
 });
 
 
-app.get('/profil', isAuthenticated, isHavePriv(1), (req, res) => {
-    res.render('profil', {
-        title: 'Profil',
-        loggedin: !!req.cookies.token,
-        lang: req.cookies.locale,
-        username: req.user ? req.user.username : null
+app.get('/profil', isAuthenticated, (req, res) => {
+    const userID = req.user.id;
+
+    const query = `
+        SELECT 
+            tickets.tickets_ID,
+            events_details.eventName,
+            events_details.eventDate,
+            rooms.rooms_Name,
+            tickets.tickets_Seat_ID
+        FROM tickets
+        JOIN events ON tickets.tickets_Event_ID = events.events_ID
+        JOIN events_details ON events.events_ID = events_details.events_ID
+        JOIN rooms ON events.events_Room_ID = rooms.rooms_ID
+        WHERE tickets.tickets_User_ID = ?
+    `;
+
+    con.query(query, [userID], (err, results) => {
+        if (err) {
+            console.error("Biletleri çekerken hata:", err);
+            return res.status(500).send('Biletler alınamadı.');
+        }
+
+        res.render('profil', {
+            title: 'Profil',
+            lang: req.cookies.locale,
+            loggedin: !!req.cookies.token,
+            username: req.user ? req.user.username : null,
+            tickets: results
+        });
     });
 });
+
 
 
 app.get('/etkinlikOnayPaneli', isAuthenticated, isHavePriv(3), (req, res) => {

@@ -8,13 +8,14 @@
         width: 70px;
         height: 70px;
         font-size: 0.9rem;
-        font-weight: 500;
+        font-weight: 600;
         line-height: 70px;
         padding: 0;
-        border-radius: 5px;
+        border-radius: 8px;
         border: none;
         color: white;
         margin: 5px;
+        transition: background-color 0.2s ease;
     }
 
     .available {
@@ -68,16 +69,14 @@
     const eventID = new URLSearchParams(window.location.search).get("eventID");
 
     if (!eventID) {
-        alert("Etkinlik ID'si belirtilmedi.");
+        alert("Etkinlik ID'si bulunamadı.");
     }
 
     async function fetchSeats() {
         try {
             const res = await fetch("/getSeats", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ event_ID: eventID })
             });
 
@@ -85,37 +84,46 @@
                 return alert("Koltuk verileri alınamadı.");
             }
 
-            const data = await res.json();
+            const seats = await res.json();
 
-            if (!data.length) {
-                return seatGrid.innerHTML = "<p>Bu etkinlik için tanımlı koltuk bulunamadı.</p>";
+            if (!seats.length) {
+                seatGrid.innerHTML = "<p>Bu etkinlik için tanımlı koltuk bulunamadı.</p>";
+                return;
             }
 
-            createGrid(data.map(x => x.seats_ID));
+            console.log("Gelen koltuklar:", seats);
+            createGrid(seats);
         } catch (err) {
             alert("Bir hata oluştu: " + err.message);
         }
     }
 
-    function createGrid(seatIDs) {
+    function createGrid(seats) {
         seatGrid.innerHTML = "";
 
         const rowDiv = document.createElement("div");
         rowDiv.className = "seat-row";
 
-        seatIDs.forEach(seatId => {
+        seats.forEach(seat => {
+            const seatID = seat.seats_ID || seat.seat_ID || seat.id; // Hangi adla geldiyse güvenli çekiyoruz
+
+            if (!seatID) {
+                console.error("Eksik koltuk verisi:", seat);
+                return;
+            }
+
             const btn = document.createElement("button");
             btn.type = "button";
             btn.className = "seat available";
-            btn.textContent = seatId;
+            btn.textContent = seatID; // numara butonda yazacak
 
             btn.addEventListener("click", () => {
                 if (btn.classList.contains("selected")) {
                     btn.classList.remove("selected");
-                    selected.splice(selected.indexOf(seatId), 1);
+                    selected.splice(selected.indexOf(seatID), 1);
                 } else {
                     btn.classList.add("selected");
-                    selected.push(seatId);
+                    selected.push(seatID);
                 }
             });
 
@@ -136,84 +144,20 @@
             for (const seatID of selected) {
                 const res = await fetch("/sendTicket", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ seatID, eventID })
                 });
 
                 if (!res.ok) {
                     const errMsg = await res.text();
-                    return alert(`Koltuk ${seatID} için bilet alınamadı. Hata: ${errMsg}`);
+                    return alert(`Koltuk ${seatID} için bilet alınamadı: ${errMsg}`);
                 }
-                createGrid(data);
-            } catch (err) {
-                alert("Bir hata oluştu: " + err.message);
-            }
-        }
-
-        function createGrid(seats) {
-            seatGrid.innerHTML = "";
-
-            const rowDiv = document.createElement("div");
-            rowDiv.className = "seat-row";
-
-            seats.forEach(seat => {
-                const btn = document.createElement("button");
-                btn.type = "button";
-                btn.className = "seat available";
-                btn.textContent = seat.seat_ID;
-
-                if(seat.occupied)
-                {
-                    btn.className ="seat unavailable"
-                }
-                else{
-                    btn.addEventListener("click", () => {
-                    if (btn.classList.contains("selected")) {
-                        btn.classList.remove("selected");
-                        selected.splice(selected.indexOf(seat.seat_ID), 1);
-                    } else {
-                        btn.classList.add("selected");
-                        selected.push(seat.seat_ID);
-                    }
-                });
-                }
-
-                rowDiv.appendChild(btn);
-            });
-
-            seatGrid.appendChild(rowDiv);
-        }
-
-        async function submitTickets(e) {
-            e.preventDefault();
-
-            if (!selected.length) {
-                return alert("Lütfen en az bir koltuk seçiniz.");
             }
 
-            try {
-                for (const seatID of selected) {
-                    const res = await fetch("/sendTicket", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify({ seatID, eventID })
-                    });
-
-                    if (!res.ok) {
-                        const errMsg = await res.json();
-                        return alert(`Koltuk ${seatID} için bilet alınamadı. Hata: ${errMsg.message}`);
-                    }
-                }
-
-                alert("Biletler başarıyla alındı.");
-                window.location.href = "/";
-            } catch (err) {
-                alert("Bir hata oluştu: " + err.message);
-            }
+            alert("Biletler başarıyla alındı!");
+            window.location.href = "/";
+        } catch (err) {
+            alert("Bilet gönderilirken hata oluştu: " + err.message);
         }
     }
 
