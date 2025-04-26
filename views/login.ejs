@@ -27,7 +27,7 @@
 
 <div class="container">
   <div class="login-container">
-    <form action="/login/check" id="form" method="get">
+    <form action="/login/check" id="form" method="get" onsubmit="return inputCheck(event)">
       <h1>
         <%= __('login') %>
       </h1>
@@ -70,16 +70,39 @@
 
   document.addEventListener("keydown", entersubmit);
 
-  function inputCheck() {
-    document.getElementById("empty").style.display = "none";
-    let pass = document.getElementById("password").value;
-    let user = document.getElementById("username").value;
-    if (pass === "" || user === "") {
-      document.getElementById("empty").style.display = "block";
-    } else {
-      document.getElementById("form").submit();
+  async function inputCheck(event) {
+      event.preventDefault(); // formun normal submit'ini engelle
+      
+      const username = document.getElementById('username').value.trim();
+      const password = document.getElementById('password').value.trim();
+
+      if (!username || !password) {
+        document.getElementById('empty').style.display = 'block';
+        return false;
+      }
+
+      try {
+        const response = await fetch(`/login/check?username=${username}&password=${password}`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          // GET request olduğu için query string ile gönderiyoruz
+        });
+
+        const data = await response.json();
+
+        if (data.message == 'success') {
+          window.location.href = '/anasayfa'; // success gelirse yönlendir
+        } else {
+          alert(data.message || 'Login failed!');
+        }
+      } catch (error) {
+        console.error('Error during login:', error);
+      }
+
+      return false;
     }
-  }
 
   function signup() {
     window.location.href = "/signup";

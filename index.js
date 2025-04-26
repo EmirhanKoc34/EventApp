@@ -677,12 +677,12 @@ app.get("/login/check", (req, res) => {
             if (sqlStoredHashedPassword === hashedPassword) {
                 const token = jwt.sign({ username: person.username, id: results[0].user_ID }, JWT_SECRET, { expiresIn: '30d' });// creates token
                 res.cookie('token', token, { httpOnly: true }); //stores that token in cookie
-                res.redirect("/anasayfa");
+                res.status(200).json({message: 'success'});
             } else {//Wrong password
-                res.redirect("/login");
+                res.status(403).json({message: 'Wrong'});
             }
         } else {//Wrong username
-            res.redirect("/login");
+            res.status(403).json({message: 'Wrong'});
         }
     });
 });
