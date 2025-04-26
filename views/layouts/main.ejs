@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <title>
+        <%= title || 'Uygulama' %>
+    </title>
+    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+
+<body class="bg-light d-flex flex-column min-vh-100">
+
+    <%- include('../partials/nav') %>
+
+        <main class="container flex-fill my-4">
+            <%- body %>
+        </main>
+
+        <%- include('../partials/footer') %>
+            <script src="/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>

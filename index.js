@@ -9,10 +9,20 @@ const i18n = require('i18n');
 const multer = require('multer');
 const fs = require('fs');
 const { eventNames } = require('process');
+const expressLayouts = require('express-ejs-layouts');
+
+
+app.use(expressLayouts);
+app.set('layout', './layouts/main'); // layout dosyanın yolu
+
 
 
 
 app.use('/bootstrap', express.static(path.join(__dirname, 'node_modules/bootstrap')));
+app.use((req, res, next) => {
+    res.locals.layout = 'layouts/main'; // <<< BU satırı ekle!
+    next();
+});
 
 // Set up Multer storage engine (optional, for custom file naming and storage locations)
 const storage = multer.diskStorage({
@@ -196,12 +206,11 @@ app.get('/', (req, res) => {
 
 app.post('/getRoomsForCreate', isAuthenticated, isHavePriv(2), (req, res) => {
     let query = "select * from rooms;";
-    con.query(query,(err,result)=>
-    {
+    con.query(query, (err, result) => {
         if (err) {
             return res.status(500).send("Odalar Çekilemedi " + err.message);
         }
-        else{
+        else {
             res.json(result);
         }
     });
@@ -258,7 +267,7 @@ app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, r
                     promises.push(new Promise((resolve, reject) => {
                         const oldPath = file.path;
                         const ext = path.extname(file.originalname);
-                        const newFileName = `${index}.png` ; // Make unique file name using index
+                        const newFileName = `${index}.png`; // Make unique file name using index
                         const newPath = path.join(eventFolder, newFileName);
 
                         // Move the file to the event folder
@@ -529,6 +538,14 @@ app.post('/isManager', isAuthenticated, isHavePriv(2), (req, res) => {
 });
 
 
+app.get('/profil', isAuthenticated, isHavePriv(1), (req, res) => {
+    res.render('profil', {
+        title: 'Profil',
+        loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
+        username: req.user ? req.user.username : null
+    });
+});
 
 
 app.get('/etkinlikOnayPaneli', isAuthenticated, isHavePriv(3), (req, res) => {
@@ -598,7 +615,7 @@ app.get('/galeri', (req, res) => {
             loggedin: !!req.cookies.token,
             lang: req.cookies.locale,
             username: req.user ? req.user.username : null,
-            images:images 
+            images: images
         });
     });
 });

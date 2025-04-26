@@ -1,93 +1,73 @@
-<!DOCTYPE html>
-<html lang="tr">
+<div class="container">
+    <h2 class="text-center mb-4">
+        <%= __('eventlist') %>
+    </h2>
 
-<head>
-    <meta charset="UTF-8">
-    <title>Etkinlik Paneli</title>
-    <link rel="stylesheet" href="/bootstrap/dist/css/bootstrap.min.css">
-</head>
+    <table class="table table-bordered bg-white shadow-sm">
+        <thead class="table-dark">
+            <tr>
+                <th>
+                    <%= __('event') %>
+                </th>
+                <th>
+                    <%= __('date') %>
+                </th>
+                <th class="text-center">
+                    <%= __('action') %>
+                </th>
+            </tr>
+        </thead>
+    </table>
+</div>
 
-<body class="d-flex flex-column min-vh-100">
 
-    <%- include('partials/nav') %>
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const response = await fetch("/getEvents");
+            if (!response.ok) {
+                return alert("Etkinlik verileri alınamadı.");
+            }
 
+            const events = await response.json();
+            const table = document.querySelector("table");
 
+            events.forEach(event => {
+                const tr = document.createElement("tr");
 
-        <div class="container">
-            <h2 class="text-center mb-4">
-                <%= __('eventlist') %>
-            </h2>
+                const tdName = document.createElement("td");
+                tdName.textContent = event.eventName;
 
-            <table class="table table-bordered bg-white shadow-sm">
-                <thead class="table-dark">
-                    <tr>
-                        <th>
-                            <%= __('event') %>
-                        </th>
-                        <th>
-                            <%= __('date') %>
-                        </th>
-                        <th class="text-center">
-                            <%= __('action') %>
-                        </th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
-
-        <%- include('partials/footer') %>
-
-            <script>
-                document.addEventListener("DOMContentLoaded", async () => {
-                    try {
-                        const response = await fetch("/getEvents");
-                        if (!response.ok) {
-                            return alert("Etkinlik verileri alınamadı.");
-                        }
-
-                        const events = await response.json();
-                        const table = document.querySelector("table");
-
-                        events.forEach(event => {
-                            const tr = document.createElement("tr");
-
-                            const tdName = document.createElement("td");
-                            tdName.textContent = event.eventName;
-
-                            const tdDate = document.createElement("td");
-                            const formattedDate = new Date(event.eventDate).toLocaleDateString("tr-TR", {
-                                year: 'numeric',
-                                month: 'long',
-                                day: 'numeric'
-                            });
-                            tdDate.textContent = formattedDate;
-
-                            const tdAction = document.createElement("td");
-                            tdAction.className = "text-center";
-
-                            const button = document.createElement("a");
-                            button.href = `/etkinlikDetay?event_ID=${event.events_ID}`;
-                            button.className = "btn btn-primary";
-                            button.textContent = "<%= __('showdetails') %> / <%= __('buyticket') %>";
-
-                            tdAction.appendChild(button);
-                            tr.appendChild(tdName);
-                            tr.appendChild(tdDate);
-                            tr.appendChild(tdAction);
-
-                            table.querySelector("tbody")?.appendChild(tr) || (() => {
-                                const tbody = document.createElement("tbody");
-                                tbody.appendChild(tr);
-                                table.appendChild(tbody);
-                            })();
-                        });
-                    } catch (err) {
-                        console.error("Hata:", err);
-                        alert("Etkinlikler yüklenirken bir hata oluştu.");
-                    }
+                const tdDate = document.createElement("td");
+                const formattedDate = new Date(event.eventDate).toLocaleDateString("tr-TR", {
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
                 });
-            </script>
+                tdDate.textContent = formattedDate;
 
-</body>
+                const tdAction = document.createElement("td");
+                tdAction.className = "text-center";
 
-</html>
+                const button = document.createElement("a");
+                button.href = `/etkinlikDetay?event_ID=${event.events_ID}`;
+                button.className = "btn btn-primary";
+                button.textContent = "<%= __('showdetails') %> / <%= __('buyticket') %>";
+
+                tdAction.appendChild(button);
+                tr.appendChild(tdName);
+                tr.appendChild(tdDate);
+                tr.appendChild(tdAction);
+
+                table.querySelector("tbody")?.appendChild(tr) || (() => {
+                    const tbody = document.createElement("tbody");
+                    tbody.appendChild(tr);
+                    table.appendChild(tbody);
+                })();
+            });
+        } catch (err) {
+            console.error("Hata:", err);
+            alert("Etkinlikler yüklenirken bir hata oluştu.");
+        }
+    });
+</script>
