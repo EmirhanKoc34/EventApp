@@ -2,7 +2,7 @@
     "settings": "Settings",
     "systemdefault": "System Default",
     "chooselang": "Choose Language",
-    "logout":"Logout",
+    "logout": "Logout",
     "events": "Events",
     "eventsconfirmpage": "Events Confirm Page",
     "createevent": "Create Event",
@@ -34,7 +34,7 @@
     "username": "Username",
     "password": "Password",
     "fillrequested": "Fill Requested Fields",
-    "signup":"Sign Up",
+    "signup": "Sign Up",
     "passwordagain": "Confirm Password",
     "alreadyaccount": "Already Have Account",
     "eventlist": "Event List",
@@ -42,5 +42,6 @@
     "date": "Date",
     "action": "Action",
     "showdetails": "Show Details",
-    "aboutus": "Zes is an innovative platform that makes it easy to create and manage events. Whether you are planning a small meeting or a large-scale event, Zes helps you organize your events quickly and practically. With our simple interface, you can easily enter event details and manage your participants effortlessly. We prioritize user experience at every step, making your organization process seamless. As a system that brings communities together and supports sharing and interaction, Zes is the easiest way to bring your events to life."
+    "aboutus": "Zes is an innovative platform that makes it easy to create and manage events. Whether you are planning a small meeting or a large-scale event, Zes helps you organize your events quickly and practically. With our simple interface, you can easily enter event details and manage your participants effortlessly. We prioritize user experience at every step, making your organization process seamless. As a system that brings communities together and supports sharing and interaction, Zes is the easiest way to bring your events to life.",
+    "profile": "Profile"
 }
