@@ -528,7 +528,6 @@ app.get('/getQrTokenForTicket',isAuthenticated,isHavePriv(2),(req,res)=>
         }
         if(checkResult.length > 0)
         {
-            console.log("tokensend");
             const token = jwt.sign({ id: ticketID }, JWT_SECRET_FOR_TICKET, { expiresIn: '30s' });
             res.status(200).json({token: token});
         }

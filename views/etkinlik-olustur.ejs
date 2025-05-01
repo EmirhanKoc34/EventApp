@@ -3,7 +3,7 @@
         <h3 class="text-center mb-4">
             <%= __('createevent') %>
         </h3>
-        <form action="/createEvent" method="POST" enctype="multipart/form-data">
+        <form id="createEventForm" action="/createEvent" method="POST" enctype="multipart/form-data">
             <div class="mb-3">
                 <label for="eventName" class="form-label">
                     <%= __('eventname') %>
@@ -55,9 +55,9 @@
     </div>
 </div>
 
-
 <script>
     document.addEventListener("DOMContentLoaded", () => {
+        // Salonları doldurmak için eski kod
         fetch('/getRoomsForCreate', {
             method: 'POST',
             headers: {
@@ -67,7 +67,7 @@
             .then(res => res.json())
             .then(data => {
                 const select = document.getElementById('roomid');
-                select.innerHTML = ''; // Eski "yükleniyor" mesajını temizle
+                select.innerHTML = '';
 
                 data.forEach(room => {
                     const option = document.createElement('option');
@@ -76,7 +76,6 @@
                     select.appendChild(option);
                 });
 
-                // Eğer hiç salon yoksa
                 if (data.length === 0) {
                     const option = document.createElement('option');
                     option.value = '';
@@ -89,5 +88,28 @@
                 const select = document.getElementById('roomid');
                 select.innerHTML = '<option value="">Salonlar yüklenemedi</option>';
             });
+
+        // Formu yakalayıp fetch ile göndermek
+        const form = document.getElementById('createEventForm');
+        form.addEventListener('submit', function (e) {
+            e.preventDefault(); // Formun normal gönderimini durdur
+
+            const formData = new FormData(form);
+
+            fetch('/createEvent', {
+                method: 'POST',
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+                    alert(data.message || 'İşlem başarılı.');
+                    window.location.href = '/anasayfa';
+                })
+                .catch(err => {
+                    console.error('Etkinlik oluşturulamadı:', err);
+                    alert('Etkinlik oluşturulamadı.');
+                    window.location.href = '/anasayfa';
+                });
+        });
     });
 </script>
