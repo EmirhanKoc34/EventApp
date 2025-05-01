@@ -780,6 +780,44 @@ app.get("/signup/check", (req, res) => {
 
 
 
+app.post('/change-password',isAuthenticated,(req,res) =>
+    {
+        let oldpass = req.body.oldpassword;
+        let newpass = req.body.newpassword;
+        let userID = req.user.id;
+    
+        let query = `SELECT user_Password FROM users WHERE user_ID = ?`;
+        con.query(query,[userID], (err,result)=>
+        {
+            if (err) {
+                return res.status(500).json({error: 'Database query failed.'});
+            }
+            let oldpasshash = hashPassword(oldpass);
+            if(oldpasshash == result[0].password)
+            {
+                let newpasshash = hashPassword(newpass);
+                let query = `UPDATE users SET user_Password = ? WHERE user_ID = ?;`;
+                con.query(query,[newpasshash,userID], (err,result)=>
+                {
+                    if (err) {
+                        return res.status(500).json({error: 'Database query failed.'});
+                    }
+                    return res.status(200).json({ success: true, message: "Password Changed Successfully"});
+                    
+    
+                });
+            }
+            else
+            {
+                return res.status(401).json({ success: false, message: "Wrong Password"});
+            }
+    
+        });
+    
+    });
+
+
+
 function hashPassword(password) {
     // Hash the password with SHA-1 in binary format
     const firstHashBinary = crypto.createHash('sha1').update(password, 'utf8').digest('binary');
