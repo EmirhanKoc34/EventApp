@@ -330,6 +330,92 @@ app.get('/getEventsForManager',isAuthenticated,isHavePriv(2),(req,res)=> // get 
 
 
 
+app.get('/getEventsDetailsForManager',isAuthenticated,isHavePriv(2),(req,res)=>
+{
+    let userid = req.user.id;
+    let eventID = req.query.eventID;
+    let images;
+    let seats;
+    let query = "select eventName, events.events_ID, eventDescription,eventDate, rooms_Name, approved from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where events.organizer_ID = ? and events.events_ID = ?;";
+
+    con.query(query,[userid,eventID],(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to get Events " + err.message);
+        }
+        if (result.length > 0) {
+            const eventFolder = path.join(__dirname, 'public', 'uploads', String(eventID));
+            fs.readdir(eventFolder, (fsErr, files) => {
+                if (fsErr) {
+                    images = [];
+                }
+                else{
+                    const imagePaths = files.map(file => `/uploads/${eventID}/${file}`);
+                    images = imagePaths;
+                }
+            });
+
+            if(result[0].approved == "1")
+            {
+                let query = `
+                    SELECT seats_ID 
+                    FROM rooms 
+                    JOIN seats ON seats_Room_ID = rooms.rooms_ID 
+                    JOIN events ON events.events_Room_ID = rooms.rooms_ID  
+                    WHERE events_ID = ?;
+                `;
+
+                con.query(query, [eventID], (err, allSeats) => {
+                    if (err) {
+                        return res.status(500).send("Failed Get Seats Data");
+                    }
+
+                    if (allSeats.length > 0) {
+                        let AlreadyTakenQuery = `
+                            SELECT tickets_Seat_ID, tickets_User_ID 
+                            FROM tickets 
+                            WHERE tickets_Event_ID = ?;
+                        `;
+
+                        con.query(AlreadyTakenQuery, [eventID], (err, takenSeats) => {
+                            if (err) {
+                                return res.status(500).send("Failed Get Seats Data");
+                            }
+
+                            
+                            const takenSeatMap = new Map();
+                            takenSeats.forEach(row => {
+                                takenSeatMap.set(row.tickets_Seat_ID, row.tickets_User_ID);
+                            });
+
+                            seats = allSeats.map(seat => ({
+                                seat_ID: seat.seats_ID,
+                                occupied: takenSeatMap.has(seat.seats_ID) ? 1 : 0,
+                                user_ID: takenSeatMap.get(seat.seats_ID) || null
+                            }));
+
+                            return res.json({eventDetails: result, images: images, seats: seats});
+                        });
+
+                    } else {
+                        return res.status(404).send("No seats found for this event");
+                    }
+                });
+            }
+            else{ // if not approved
+                return res.json({eventDetails: result, images: images});
+            }
+
+        }
+        else {
+            res.status(404).json({ error: "Given Event Not found" });
+        }
+    });
+
+});
+
+
+
 app.get('/getEventsForAdmin', isAuthenticated, isHavePriv(3), (req, res) =>// get list of events for approving 
 {
     let query = `select events.events_ID, eventName,eventDate,approved, rooms_Name from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID ORDER BY approved;`;
@@ -482,7 +568,7 @@ app.post('/getSeats', isAuthenticated, isHavePriv(1), (req, res) => {
         else {
             return res.status(404).send("No seats found for this event");
         }
-    })
+    });
 
 });
 
