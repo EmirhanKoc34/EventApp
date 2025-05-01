@@ -313,7 +313,7 @@ app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, r
 app.get('/getEventsForManager',isAuthenticated,isHavePriv(2),(req,res)=> // get list of events that user created
 {
     let userid = req.user.id;
-    let query = 'select eventName, events.events_ID, eventDate, rooms_Name from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where events.organizer_ID = ?;';
+    let query = 'select eventName, events.events_ID, eventDate, rooms_Name,approved from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where events.organizer_ID = ?;';
     con.query(query,[userid],(err,result)=>
     {
         if (err) {
@@ -733,6 +733,15 @@ app.get('/etkinlikDetay', isAuthenticated, isHavePriv(1), (req, res) => {
 app.get('/etkinlik-olustur', isAuthenticated, isHavePriv(2), (req, res) => {
     res.render("etkinlik-olustur", {
         title: 'Etkinlik Oluştur',
+        loggedin: !!req.cookies.token,
+        lang: req.cookies.locale,
+        username: req.user ? req.user.username : null
+    });
+});
+
+app.get('/kulup-paneli', isAuthenticated, isHavePriv(2), (req, res) => {
+    res.render("kulup-paneli", {
+        title: 'Kulüp Paneli',
         loggedin: !!req.cookies.token,
         lang: req.cookies.locale,
         username: req.user ? req.user.username : null

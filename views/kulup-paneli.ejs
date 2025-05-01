@@ -1,9 +1,25 @@
 <div class="container my-5">
     <h2 class="text-center mb-4">🎓 Kulüp Etkinlik Paneli</h2>
+    <div id="events-container" class="text-center">
+        <p>Yükleniyor...</p>
+    </div>
+</div>
 
-    <% if (events.length===0) { %>
-        <p class="text-center">Henüz hiç etkinlik oluşturmadınız.</p>
-        <% } else { %>
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+    const container = document.getElementById('events-container');
+
+    try {
+        const response = await fetch('/getEventsForManager');
+        if (!response.ok) throw new Error('Etkinlikler alınamadı');
+        const events = await response.json();
+
+        if (events.length === 0) {
+            container.innerHTML = `<p>Henüz hiç etkinlik oluşturmadınız.</p>`;
+            return;
+        }
+
+        let tableHTML = `
             <table class="table table-bordered text-center">
                 <thead class="table-dark">
                     <tr>
@@ -15,33 +31,29 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% events.forEach(event=> { %>
-                        <tr>
-                            <td>
-                                <%= event.eventName %>
-                            </td>
-                            <td>
-                                <%= event.eventDate.toISOString().slice(0, 10) %>
-                            </td>
-                            <td>
-                                <%= event.rooms_Name %>
-                            </td>
-                            <td>
-                                <% if (event.approved===1) { %>
-                                    ✅ Onaylandı
-                                    <% } else if (event.approved===0) { %>
-                                        ⏳ Bekliyor
-                                        <% } else { %>
-                                            ❌ Reddedildi
-                                            <% } %>
-                            </td>
-                            <td>
-                                <a href="/etkinlik-detay?eventID=<%= event.events_ID %>"
-                                    class="btn btn-sm btn-outline-primary">Detay</a>
-                            </td>
-                        </tr>
-                        <% }) %>
-                </tbody>
-            </table>
-            <% } %>
-</div>
+        `;
+
+        events.forEach(event => {
+            const date = new Date(event.eventDate).toISOString().slice(0, 10);
+            const status = event.approved === 1 ? "✅ Onaylandı" :
+                           event.approved === 0 ? "⏳ Bekliyor" : "❌ Reddedildi";
+
+            tableHTML += `
+                <tr>
+                    <td>${event.eventName}</td>
+                    <td>${date}</td>
+                    <td>${event.rooms_Name}</td>
+                    <td>${status}</td>
+                    <td><a href="/etkinlik-detay?eventID=${event.events_ID}" class="btn btn-sm btn-outline-primary">Detay</a></td>
+                </tr>
+            `;
+        });
+
+        tableHTML += `</tbody></table>`;
+        container.innerHTML = tableHTML;
+
+    } catch (err) {
+        container.innerHTML = `<p class="text-danger">Hata: ${err.message}</p>`;
+    }
+});
+</script>
