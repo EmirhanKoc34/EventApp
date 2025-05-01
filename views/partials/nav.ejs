@@ -70,6 +70,11 @@
                             <%= __('events') %>
                         </a>
                     </li>
+                    <li class="nav-item" id="kulupPaneliLink" style="display: none;">
+                        <a class="nav-link" href="/kulup-paneli">
+                            🎓 Kulüp Paneli
+                        </a>
+                    </li>
                     <li class="nav-item" id="etkinlikOlustur">
                         <a class="nav-link" href="/etkinlik-olustur">
                             <%= __('createevent') %>
@@ -140,6 +145,13 @@
             'Content-Type': 'application/json'
         }
     }).then(data => {
+
+        if (data.status === 200) {
+            document.getElementById('kulupPaneliLink')?.style.setProperty('display', 'block');
+        } else {
+            document.getElementById('kulupPaneliLink')?.remove();
+        }
+
         if (data.redirected) {
             document.getElementById('etkinlikOlustur')?.remove();
         }
