@@ -310,6 +310,24 @@ app.post('/createEvent', isAuthenticated, isHavePriv(2), uploadMultiple, (req, r
 });
 
 
+app.get('/getEventsForManager',isAuthenticated,isHavePriv(2),(req,res)=> // get list of events that user created
+{
+    let userid = req.user.id;
+    let query = 'select eventName, events.events_ID, eventDate, rooms_Name from events join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where events.organizer_ID = ?;';
+    con.query(query,[userid],(err,result)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to get Events " + err.message);
+        }
+        if (result.length > 0) {
+            res.json(result);
+        }
+        else {
+            res.status(404).json({ error: "No Events Found" });
+        }
+    });
+});
+
 
 
 app.get('/getEventsForAdmin', isAuthenticated, isHavePriv(3), (req, res) =>// get list of events for approving 
@@ -781,7 +799,7 @@ app.get("/signup/check", (req, res) => {
 
 
 app.post('/change-password',isAuthenticated,(req,res) =>
-    {
+{
         let oldpass = req.body.oldpassword;
         let newpass = req.body.newpassword;
         let userID = req.user.id;
@@ -814,7 +832,9 @@ app.post('/change-password',isAuthenticated,(req,res) =>
     
         });
     
-    });
+});
+
+
 
 
 
