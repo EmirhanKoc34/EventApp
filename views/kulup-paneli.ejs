@@ -1,0 +1,47 @@
+<div class="container my-5">
+    <h2 class="text-center mb-4">🎓 Kulüp Etkinlik Paneli</h2>
+
+    <% if (events.length===0) { %>
+        <p class="text-center">Henüz hiç etkinlik oluşturmadınız.</p>
+        <% } else { %>
+            <table class="table table-bordered text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Etkinlik Adı</th>
+                        <th>Tarih</th>
+                        <th>Salon</th>
+                        <th>Durum</th>
+                        <th>İşlem</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% events.forEach(event=> { %>
+                        <tr>
+                            <td>
+                                <%= event.eventName %>
+                            </td>
+                            <td>
+                                <%= event.eventDate.toISOString().slice(0, 10) %>
+                            </td>
+                            <td>
+                                <%= event.rooms_Name %>
+                            </td>
+                            <td>
+                                <% if (event.approved===1) { %>
+                                    ✅ Onaylandı
+                                    <% } else if (event.approved===0) { %>
+                                        ⏳ Bekliyor
+                                        <% } else { %>
+                                            ❌ Reddedildi
+                                            <% } %>
+                            </td>
+                            <td>
+                                <a href="/etkinlik-detay?eventID=<%= event.events_ID %>"
+                                    class="btn btn-sm btn-outline-primary">Detay</a>
+                            </td>
+                        </tr>
+                        <% }) %>
+                </tbody>
+            </table>
+            <% } %>
+</div>
