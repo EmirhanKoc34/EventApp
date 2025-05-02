@@ -1,0 +1,30 @@
+
+
+<div class="container my-5">
+    <h2 class="text-center mb-4">📋 Etkinlik Detayları</h2>
+
+    <form method="POST" action="/kulup-paneli-detay/update">
+        <input type="hidden" name="eventID" value="<%= eventID %>">
+
+        <div class="mb-3">
+            <label for="eventName" class="form-label">Etkinlik Adı</label>
+            <input type="text" class="form-control" id="eventName" name="eventName" value="<%= event.eventName %>" required>
+        </div>
+
+        <div class="mb-3">
+            <label for="eventDescription" class="form-label">Açıklama</label>
+            <textarea class="form-control" id="eventDescription" name="eventDescription" rows="5" required><%= event.eventDescription %></textarea>
+        </div>
+
+        <div class="mb-3">
+            <label for="eventDate" class="form-label">Tarih</label>
+            <input type="datetime-local" class="form-control" id="eventDate" name="eventDate" 
+                value="<%= new Date(event.eventDate).toISOString().slice(0, 16) %>" required>
+        </div>
+
+        <div class="d-flex justify-content-between">
+            <a href="/kulup-paneli" class="btn btn-secondary">◀ Geri</a>
+            <button type="submit" class="btn btn-primary">💾 Güncelle</button>
+        </div>
+    </form>
+</div>

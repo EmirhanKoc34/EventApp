@@ -11,6 +11,8 @@ const fs = require('fs');
 const { eventNames } = require('process');
 const expressLayouts = require('express-ejs-layouts');
 const { decode } = require('punycode');
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
 
 
 app.use(expressLayouts);
@@ -770,6 +772,45 @@ app.get('/kulup-paneli', isAuthenticated, isHavePriv(2), (req, res) => {
     });
 });
 
+app.get('/kulup-paneli-detay', isAuthenticated, isHavePriv(2), (req, res) => {
+    const userID = req.user.id;
+    const eventID = req.query.eventID;
+
+    if (!eventID) {
+        return res.status(400).send("Etkinlik ID'si belirtilmedi.");
+    }
+
+    const query = `
+        SELECT eventName, eventDescription, eventDate
+        FROM events_details
+        JOIN events ON events.events_ID = events_details.events_ID
+        WHERE events_details.events_ID = ? AND events.organizer_ID = ?
+    `;
+
+    con.query(query, [eventID, userID], (err, results) => {
+        if (err) {
+            console.error("Etkinlik detayları alınamadı:", err);
+            return res.status(500).send("Detaylar alınamadı.");
+        }
+
+        if (results.length === 0) {
+            return res.status(404).send("Bu etkinlik bulunamadı veya yetkiniz yok.");
+        }
+
+        res.render('kulup-paneli-detay', {
+            title: 'Etkinlik Detay',
+            lang: req.cookies.locale,
+            loggedin: !!req.cookies.token,
+            username: req.user.username,
+            event: results[0],
+            eventID: eventID
+        });
+    });
+});
+
+
+
+
 app.get('/etkinlikKoltukSec', isAuthenticated, isHavePriv(1), (req, res) => {
     res.render("koltuk-sec", {
         title: 'Koltuk Seç',
@@ -969,6 +1010,49 @@ function hashPassword(password) {
 app.use((req, res) => {// this should always be on the end of the code because if we dont have any route that user entered it will always run this code
     res.redirect('/anasayfa');
 });
+
+app.post('/kulup-paneli-detay/update', isAuthenticated, isHavePriv(2), (req, res) => {
+    const userID = req.user.id;
+    const { eventID, eventName, eventDescription, eventDate } = req.body;
+
+    if (!eventID || !eventName || !eventDescription || !eventDate) {
+        return res.status(400).send("Tüm alanlar zorunludur.");
+    }
+
+    // Kullanıcının gerçekten bu etkinliğin sahibi olduğunu kontrol et
+    const checkOwnerQuery = `
+        SELECT * FROM events
+        WHERE events_ID = ? AND organizer_ID = ?
+    `;
+
+    con.query(checkOwnerQuery, [eventID, userID], (err, result) => {
+        if (err) {
+            console.error("Sahiplik kontrolü hatası:", err);
+            return res.status(500).send("Bir hata oluştu.");
+        }
+
+        if (result.length === 0) {
+            return res.status(403).send("Bu etkinliği güncelleme yetkiniz yok.");
+        }
+
+        // Güncelleme sorgusu
+        const updateQuery = `
+            UPDATE events_details
+            SET eventName = ?, eventDescription = ?, eventDate = ?
+            WHERE events_ID = ?
+        `;
+
+        con.query(updateQuery, [eventName, eventDescription, eventDate, eventID], (err2) => {
+            if (err2) {
+                console.error("Güncelleme hatası:", err2);
+                return res.status(500).send("Etkinlik güncellenemedi.");
+            }
+
+            res.redirect(`/kulup-paneli-detay?eventID=${eventID}`);
+        });
+    });
+});
+
 
 let port = 8001;
 let ip = "0.0.0.0";
