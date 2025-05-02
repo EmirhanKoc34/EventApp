@@ -359,7 +359,7 @@ app.get('/getEventsDetailsForManager',isAuthenticated,isHavePriv(2),(req,res)=>
             if(result[0].approved == "1")
             {
                 let query = `
-                    SELECT seats_ID 
+                    SELECT seats_ID ,seats_Name
                     FROM rooms 
                     JOIN seats ON seats_Room_ID = rooms.rooms_ID 
                     JOIN events ON events.events_Room_ID = rooms.rooms_ID  
@@ -391,6 +391,7 @@ app.get('/getEventsDetailsForManager',isAuthenticated,isHavePriv(2),(req,res)=>
 
                             seats = allSeats.map(seat => ({
                                 seat_ID: seat.seats_ID,
+                                seat_Name: seat.seats_Name,
                                 occupied: takenSeatMap.has(seat.seats_ID) ? 1 : 0,
                                 user_ID: takenSeatMap.get(seat.seats_ID) || null
                             }));
@@ -409,7 +410,7 @@ app.get('/getEventsDetailsForManager',isAuthenticated,isHavePriv(2),(req,res)=>
 
         }
         else {
-            res.status(404).json({ error: "Given Event Not found" });
+            return res.status(404).json({ error: "Given Event Not found" });
         }
     });
 
@@ -541,9 +542,9 @@ app.get('/getEventDetails', isAuthenticated, isHavePriv(1), (req, res) => {
     });
 });
 
-app.post('/getSeats', isAuthenticated, isHavePriv(1), (req, res) => {
+app.post('/getSeats', isAuthenticated, isHavePriv(1), (req, res) => {// used in ticket buy page
     let event_ID = req.body.event_ID;
-    let query = 'select seats_ID from rooms join seats on seats_Room_ID = rooms.rooms_ID join events on events.events_Room_ID = rooms.rooms_ID  where events_ID = ?;';
+    let query = 'select seats_ID, seats_Name from rooms join seats on seats_Room_ID = rooms.rooms_ID join events on events.events_Room_ID = rooms.rooms_ID  where events_ID = ?;';
     con.query(query, [event_ID], (err, allSeats) => {
         if (err) {
             return res.status(500).send("Failed Get Seats Data");
@@ -558,6 +559,7 @@ app.post('/getSeats', isAuthenticated, isHavePriv(1), (req, res) => {
 
                 const seatsWithStatus = allSeats.map(seat => ({
                     seat_ID: seat.seats_ID,
+                    seat_Name: seat.seats_Name,
                     occupied: takenSeatSet.has(seat.seats_ID) ? 1 : 0
                 }));
 
@@ -599,10 +601,11 @@ app.post('/sendTicket', isAuthenticated, isHavePriv(1), (req, res) => {
     });
 });
 
+// will send seat_name
 app.get('/getTickets', isAuthenticated, isHavePriv(1), (req, res) =>// to get all tickets of user
 {
     let userid = req.user.id;
-    let query = 'select tickets_ID, tickets_Seat_ID,events.events_ID, events_details.eventName,events_details.eventDate,rooms.rooms_Name  from tickets join events on events.events_ID = tickets.tickets_Event_ID join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID where tickets_User_ID = ?;'
+    let query = 'select tickets_ID,seats.seats_Name, tickets_Seat_ID,events.events_ID, events_details.eventName,events_details.eventDate,rooms.rooms_Name  from tickets join events on events.events_ID = tickets.tickets_Event_ID join events_details on events.events_ID = events_details.events_ID join rooms on events.events_Room_ID = rooms.rooms_ID join seats on tickets_Seat_ID = seats.seats_ID where tickets_User_ID = ?;'
     con.query(query, [userid], (err, result) => {
         if (err) {
             return res.status(500).send("Failed to get tickets");
@@ -863,10 +866,10 @@ app.get("/login/check", (req, res) => {
                 res.cookie('token', token, { httpOnly: true }); //stores that token in cookie
                 res.status(200).json({message: 'success'});
             } else {//Wrong password
-                res.status(403).json({message: 'Wrong'});
+                res.status(403).json({message: 'Wrong password or username'});
             }
         } else {//Wrong username
-            res.status(403).json({message: 'Wrong'});
+            res.status(403).json({message: 'Wrong password or username'});
         }
     });
 });
@@ -898,7 +901,7 @@ app.get("/signup/check", (req, res) => {
         }
 
         if (results.length > 0) {
-            return res.send(`betterAlert(3, "Bu Kullanıcı adı bulunuyor, giriş yapın yada başka bir kullanıcı adı seçin", "Hata!");`);
+            return res.send("Bu Kullanıcı adı bulunuyor, giriş yapın yada başka bir kullanıcı adı seçin");
         } else {
             let createUserQuery = `INSERT INTO users VALUES(0,"${person.username}","${hashedPassword}",1);`;// Creates user with person.username, person.password , groupID = 2 , and the automatic userID
 
