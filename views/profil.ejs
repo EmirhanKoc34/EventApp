@@ -1,42 +1,56 @@
 <div class="container my-5">
-    <h2 class="text-center mb-4">👤 <%= username %> - <%= __('profile') %>
-    </h2>
+    <h2 class="text-center mb-4">👤 <%= username %> - <%= __('profile') %></h2>
+    <h3 class="text-center mb-4">🎫 <%= __('mytickets') %></h3>
 
-    <h3 class="text-center mb-4">🎫 <%= __('mytickets') %>
-    </h3>
-
-    <% if (tickets.length===0) { %>
-        <p class="text-center">Henüz hiç biletiniz yok.</p>
-        <% } else { %>
-            <div class="table-responsive">
-                <table class="table table-striped table-hover text-center">
-                    <thead class="table-dark">
-                        <tr>
-                            <th><%= __('events') %></th>
-                            <th><%= __('hall') %></th>
-                            <th><%= __('date') %></th>
-                            <th><%= __('seat') %></th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        <% tickets.forEach(ticket=> { %>
-                            <tr>
-                                <td>
-                                    <%= ticket.eventName %>
-                                </td>
-                                <td>
-                                    <%= ticket.rooms_Name %>
-                                </td>
-                                <td>
-                                    <%= ticket.eventDate.toISOString().slice(0,10) %>
-                                </td>
-                                <td>
-                                    <%= ticket.tickets_Seat_ID %>
-                                </td>
-                            </tr>
-                            <% }) %>
-                    </tbody>
-                </table>
-            </div>
-            <% } %>
+    <div id="ticket-container" class="text-center">
+        <p>Yükleniyor...</p>
+    </div>
 </div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    fetch('/getTickets')
+    .then(res => res.json())
+    .then(data => {
+        const container = document.getElementById('ticket-container');
+        container.innerHTML = ""; 
+
+        if (data.message === "No Tickets Found" || data.length === 0) {
+            container.innerHTML = "<p>Henüz hiç biletiniz yok.</p>";
+        } else {
+            let table = `
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover text-center">
+                        <thead class="table-dark">
+                            <tr>
+                                <th><%= __('events') %></th>
+                                <th><%= __('hall') %></th>
+                                <th><%= __('date') %></th>
+                                <th><%= __('seat') %></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+            `;
+
+            data.forEach(ticket => {
+                let date = new Date(ticket.eventDate).toISOString().slice(0,10);
+                table += `
+                    <tr>
+                        <td>${ticket.eventName}</td>
+                        <td>${ticket.rooms_Name}</td>
+                        <td>${date}</td>
+                        <td>${ticket.tickets_Seat_ID}</td>
+                    </tr>
+                `;
+            });
+
+            table += `</tbody></table></div>`;
+            container.innerHTML = table;
+        }
+    })
+    .catch(err => {
+        document.getElementById('ticket-container').innerHTML = "<p>Veriler alınamadı.</p>";
+        console.error("Fetch error:", err);
+    });
+});
+</script>
