@@ -105,7 +105,7 @@
         rowDiv.className = "seat-row";
 
         seats.forEach(seat => {
-            const seatID = seat.seats_ID || seat.seat_ID || seat.id; // Hangi adla geldiyse güvenli çekiyoruz
+            const seatID = seat.seat_ID 
 
             if (!seatID) {
                 console.error("Eksik koltuk verisi:", seat);
@@ -114,8 +114,15 @@
 
             const btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "seat available";
-            btn.textContent = seatID; // numara butonda yazacak
+            if(seat.occupied)
+            {
+                btn.className = "seat unavailable";
+            }
+            else{
+                btn.className = "seat available";
+            }
+
+            btn.textContent = seat.seat_Name; // numara butonda yazacak
 
             btn.addEventListener("click", () => {
                 if (btn.classList.contains("selected")) {
