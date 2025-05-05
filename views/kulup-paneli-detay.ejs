@@ -1,30 +1,316 @@
-
-
 <div class="container my-5">
     <h2 class="text-center mb-4">📋 Etkinlik Detayları</h2>
+    <style>
+    .seat-popup-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+    }
 
-    <form method="POST" action="/kulup-paneli-detay/update">
-        <input type="hidden" name="eventID" value="<%= eventID %>">
+    .seat-popup {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 600px;
+      max-height: 80vh;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .seat-row {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 10px;
+    }
+
+    .seat {
+      padding: 10px 14px;
+      margin: 6px;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+    }
+
+    .available {
+      background-color: #198754;
+      color: white;
+    }
+
+    .unavailable {
+      background-color: #dc3545;
+      cursor: pointer;
+      color: white;
+    }
+
+    .selected {
+      background-color: #ffc107;
+      color: black;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 15px;
+      font-size: 20px;
+      background: none;
+      border: none;
+      cursor: pointer;
+    }
+
+    .outside-close {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  z-index: 1001;
+  background: white;
+  color: black;
+  font-size: 24px;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  box-shadow: 0 0 10px rgba(0,0,0,0.3);
+  cursor: pointer;
+}
+
+#popupImage {
+  max-width: 90vw;
+  max-height: 90vh;
+  object-fit: contain;
+}
+
+    
+    </style>
+
+
+    <form >
+        <input type="hidden" name="eventID" id="eventID">
 
         <div class="mb-3">
             <label for="eventName" class="form-label">Etkinlik Adı</label>
-            <input type="text" class="form-control" id="eventName" name="eventName" value="<%= event.eventName %>" required>
+            <input type="text" class="form-control" id="eventName" name="eventName" required>
         </div>
 
         <div class="mb-3">
             <label for="eventDescription" class="form-label">Açıklama</label>
-            <textarea class="form-control" id="eventDescription" name="eventDescription" rows="5" required><%= event.eventDescription %></textarea>
+            <textarea class="form-control" id="eventDescription" name="eventDescription" rows="5" required></textarea>
         </div>
 
         <div class="mb-3">
             <label for="eventDate" class="form-label">Tarih</label>
-            <input type="datetime-local" class="form-control" id="eventDate" name="eventDate" 
-                value="<%= new Date(event.eventDate).toISOString().slice(0, 16) %>" required>
+            <input type="datetime-local" class="form-control" id="eventDate" name="eventDate" required>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label">Etkinlik Görselleri:</label>
+            <div id="imageGallery" class="d-flex flex-wrap gap-2"></div>
         </div>
 
         <div class="d-flex justify-content-between">
             <a href="/kulup-paneli" class="btn btn-secondary">◀ Geri</a>
-            <button type="submit" class="btn btn-primary">💾 Güncelle</button>
+            
+
+            <button type="submit" id="submit" class="btn btn-primary">💾 Güncelle</button>
         </div>
     </form>
+    <button id="openSeatsBtn" class="btn btn-primary mt-2">Koltukları Göster</button>
 </div>
+
+<!-- Koltuk Detayları Modal -->
+<div class="modal fade" id="seatModal" tabindex="-1" aria-labelledby="seatModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="seatModalLabel">Koltuk Detayı</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Kapat"></button>
+      </div>
+      <div class="modal-body">
+        <p><strong>Koltuk ID:</strong> <span id="modalSeatID"></span></p>
+        <p><strong>Koltuk Adı:</strong> <span id="modalSeatName"></span></p>
+        <p><strong>Durum:</strong> <span id="modalSeatStatus"></span></p>
+        <p><strong>Kullanıcı ID (varsa):</strong> <span id="modalSeatUser"></span></p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Görsel popup -->
+<div id="imageModal" class="seat-popup-overlay" style="display: none; position: fixed;">
+    <!-- Çarpı butonu dışarıda -->
+    <button class="close-btn outside-close" onclick="document.getElementById('imageModal').style.display='none'">X</button>
+  
+    <div class="seat-popup" id="popupdiv" style="padding: 0; max-width: 90%; max-height: 90%;" onclick="event.stopPropagation()">
+      <img id="popupImage" src="" alt="Görsel" style="width: 100%; height: auto; display: block; border-radius: 8px;" />
+    </div>
+  </div>
+
+<!-- Bootstrap JS ve Popper.js -->
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.10.2/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.min.js"></script>
+
+<script>
+    var seatData;
+    const seatGrid = document.getElementById("seatGrid");
+    const imageGallery = document.getElementById("imageGallery");
+
+    document.addEventListener("DOMContentLoaded", function () {
+        const urlParams = new URLSearchParams(window.location.search);
+        const eventID = urlParams.get("eventID");
+
+        if (!eventID) {
+            alert("Etkinlik ID'si eksik.");
+            return;
+        }
+
+        fetch(`/getEventsDetailsForManager?eventID=${eventID}`)
+            .then(res => res.json())
+            .then(data => {
+                if (data.error) {
+                    alert("Etkinlik bulunamadı.");
+                    return;
+                }
+
+                const event = data.eventDetails[0];
+
+                document.getElementById("eventID").value = event.events_ID;
+                document.getElementById("eventName").value = event.eventName;
+                document.getElementById("eventDescription").value = event.eventDescription;
+
+                const date = new Date(event.eventDate);
+                const localDateTime = date.toISOString().slice(0, 16);
+                document.getElementById("eventDate").value = localDateTime;
+
+                // Resimleri ekle
+                if (data.images && Array.isArray(data.images)) {
+                    imageGallery.innerHTML = "";
+                    data.images.forEach(imgSrc => {
+                        const img = document.createElement("img");
+                        img.src = imgSrc;
+                        img.alt = "Event Image";
+                        img.style.width = "150px";
+                        img.style.height = "auto";
+                        img.classList.add("border", "rounded");
+                        img.style.cursor = "pointer";
+                        
+                        // Tıklanınca popup'ı göster
+                        img.addEventListener("click", () => {
+                            document.getElementById("popupImage").src = imgSrc;
+                            document.getElementById("imageModal").style.display = "flex";
+                        });
+
+                        imageGallery.appendChild(img);
+                    });
+                }
+
+                // Koltukları ekle
+                if (data.seats && Array.isArray(data.seats)) {
+                    seatData = data.seats;
+                }
+
+            })
+            .catch(err => {
+                console.error("Hata:", err);
+                alert("Veri alınırken bir hata oluştu.");
+            });
+    });
+
+document.getElementById("openSeatsBtn").addEventListener("click", async () => {
+      try {
+        showSeatPopup(seatData);
+      } catch (err) {
+        alert("Koltuk verisi alınamadı");
+        console.error(err);
+      }
+});
+
+function showSeatPopup(seats) {
+    const urlParams = new URLSearchParams(window.location.search);
+    const eventID = urlParams.get("eventID");
+  // Önce varsa eski popup'ı temizle
+  const existing = document.querySelector(".seat-popup-overlay");
+  if (existing) existing.remove();
+
+  const overlay = document.createElement("div");
+  overlay.className = "seat-popup-overlay";
+
+  const popup = document.createElement("div");
+  popup.className = "seat-popup";
+
+  const closeBtn = document.createElement("button");
+  closeBtn.className = "close-btn";
+  closeBtn.innerHTML = "&times;";
+  closeBtn.onclick = () => overlay.remove();
+
+  const title = document.createElement("h3");
+  title.textContent = "Koltuk Detayları";
+
+  const rowDiv = document.createElement("div");
+  rowDiv.className = "seat-row";
+
+  seats.forEach(seat => {
+    const seatID = seat.seat_ID;
+
+    if (!seatID) return;
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.textContent = seat.seat_Name;
+
+    if (seat.occupied) {
+      btn.className = "seat unavailable";
+      btn.disabled = true;
+      btn.addEventListener('mouseover', () => {
+        alert("buraya kullanıcı bilgileri düzgün gelicek alert olarak değil");
+      });
+    } else {
+      btn.className = "seat available";
+      btn.disabled = true;
+    }
+
+    rowDiv.appendChild(btn);
+  });
+
+  popup.appendChild(closeBtn);
+  popup.appendChild(title);
+  popup.appendChild(rowDiv);
+  overlay.appendChild(popup);
+  document.body.appendChild(overlay);
+}
+
+document.getElementById('submit').addEventListener('click',()=>
+{
+
+    fetch('/updateEventDetails', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+        eventID: document.getElementById("eventID").value,
+        eventName: document.getElementById("eventName").value,
+        eventDescription: document.getElementById("eventDescription").value,
+        eventDate: document.getElementById("eventDate").value
+    })
+})
+.then(response => response.json())
+.then(data => {
+    if (data.success) {
+        alert("Etkinlik başarıyla güncellendi!");
+        window.location.replace('/anasayfa');
+    } else {
+        // Hata mesajını gösterin
+        alert("Bir hata oluştu: " + data.message);
+    }
+})
+.catch(err => {
+    console.error("Hata:", err);
+    alert("Bir hata oluştu, lütfen tekrar deneyin.");
+});
+
+});
+</script>

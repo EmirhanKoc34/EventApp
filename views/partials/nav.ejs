@@ -65,12 +65,14 @@
                 </a>
 
                 <ul class="navbar-nav d-flex flex-column flex-lg-row align-items-lg-center gap-2">
+                    <% if (loggedin) { %>
                     <li class="nav-item">
                         <a class="nav-link" href="/panel">
                             <%= __('events') %>
                         </a>
                     </li>
-                    <li class="nav-item" id="kulupPaneliLink" style="display: none;">
+                    <% } %>
+                    <li class="nav-item" id="kulupPaneliLink">
                         <a class="nav-link" href="/kulup-paneli">
                             🎓 Kulüp Paneli
                         </a>
@@ -145,14 +147,8 @@
             'Content-Type': 'application/json'
         }
     }).then(data => {
-
-        if (data.status === 200) {
-            document.getElementById('kulupPaneliLink')?.style.setProperty('display', 'block');
-        } else {
-            document.getElementById('kulupPaneliLink')?.remove();
-        }
-
         if (data.redirected) {
+            document.getElementById('kulupPaneliLink')?.remove();
             document.getElementById('etkinlikOlustur')?.remove();
         }
     });

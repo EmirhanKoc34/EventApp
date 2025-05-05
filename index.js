@@ -419,6 +419,37 @@ app.get('/getEventsDetailsForManager',isAuthenticated,isHavePriv(2),(req,res)=>
 });
 
 
+app.post('/updateEventDetails',isAuthenticated,isHavePriv(2),(req,res)=>
+{
+    const { eventID, eventName, eventDescription, eventDate } = req.body;
+    let userid = req.user.id;
+    let checkQuery = "select * from events where events_ID = ? and organizer_ID = ?";
+    con.query(checkQuery,[eventID,userid],(err,checkResult)=>
+    {
+        if (err) {
+            return res.status(500).send("Failed to get Events " + err.message);
+        }
+        if(checkResult.length > 0)
+        {
+            let query = "UPDATE events_details SET eventName = ?, eventDescription = ?, eventDate = ? WHERE (events_ID = ?);";
+            con.query(query,[eventName,eventDescription,eventDate,eventID],(err,result)=>{
+                if (err) {
+                    return res.status(500).send("Failed to update Events " + err.message);
+                }else{
+                    res.status(200).json({success: true});
+                }
+            });
+
+        }else{
+            return res.status(403).json({ error: "You Dont Own This Event" }); 
+        }
+
+    });
+
+
+});
+
+
 
 app.get('/getEventsForAdmin', isAuthenticated, isHavePriv(3), (req, res) =>// get list of events for approving 
 {
@@ -776,38 +807,11 @@ app.get('/kulup-paneli', isAuthenticated, isHavePriv(2), (req, res) => {
 });
 
 app.get('/kulup-paneli-detay', isAuthenticated, isHavePriv(2), (req, res) => {
-    const userID = req.user.id;
-    const eventID = req.query.eventID;
-
-    if (!eventID) {
-        return res.status(400).send("Etkinlik ID'si belirtilmedi.");
-    }
-
-    const query = `
-        SELECT eventName, eventDescription, eventDate
-        FROM events_details
-        JOIN events ON events.events_ID = events_details.events_ID
-        WHERE events_details.events_ID = ? AND events.organizer_ID = ?
-    `;
-
-    con.query(query, [eventID, userID], (err, results) => {
-        if (err) {
-            console.error("Etkinlik detayları alınamadı:", err);
-            return res.status(500).send("Detaylar alınamadı.");
-        }
-
-        if (results.length === 0) {
-            return res.status(404).send("Bu etkinlik bulunamadı veya yetkiniz yok.");
-        }
-
-        res.render('kulup-paneli-detay', {
-            title: 'Etkinlik Detay',
-            lang: req.cookies.locale,
-            loggedin: !!req.cookies.token,
-            username: req.user.username,
-            event: results[0],
-            eventID: eventID
-        });
+    res.render('kulup-paneli-detay', {
+        title: 'Etkinlik Detay',
+        lang: req.cookies.locale,
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null
     });
 });
 
@@ -1012,48 +1016,6 @@ function hashPassword(password) {
 
 app.use((req, res) => {// this should always be on the end of the code because if we dont have any route that user entered it will always run this code
     res.redirect('/anasayfa');
-});
-
-app.post('/kulup-paneli-detay/update', isAuthenticated, isHavePriv(2), (req, res) => {
-    const userID = req.user.id;
-    const { eventID, eventName, eventDescription, eventDate } = req.body;
-
-    if (!eventID || !eventName || !eventDescription || !eventDate) {
-        return res.status(400).send("Tüm alanlar zorunludur.");
-    }
-
-    // Kullanıcının gerçekten bu etkinliğin sahibi olduğunu kontrol et
-    const checkOwnerQuery = `
-        SELECT * FROM events
-        WHERE events_ID = ? AND organizer_ID = ?
-    `;
-
-    con.query(checkOwnerQuery, [eventID, userID], (err, result) => {
-        if (err) {
-            console.error("Sahiplik kontrolü hatası:", err);
-            return res.status(500).send("Bir hata oluştu.");
-        }
-
-        if (result.length === 0) {
-            return res.status(403).send("Bu etkinliği güncelleme yetkiniz yok.");
-        }
-
-        // Güncelleme sorgusu
-        const updateQuery = `
-            UPDATE events_details
-            SET eventName = ?, eventDescription = ?, eventDate = ?
-            WHERE events_ID = ?
-        `;
-
-        con.query(updateQuery, [eventName, eventDescription, eventDate, eventID], (err2) => {
-            if (err2) {
-                console.error("Güncelleme hatası:", err2);
-                return res.status(500).send("Etkinlik güncellenemedi.");
-            }
-
-            res.redirect(`/kulup-paneli-detay?eventID=${eventID}`);
-        });
-    });
 });
 
 
