@@ -8,12 +8,9 @@ var cookieParser = require('cookie-parser');
 const i18n = require('i18n');
 const multer = require('multer');
 const fs = require('fs');
-const { eventNames } = require('process');
 const expressLayouts = require('express-ejs-layouts');
-const { decode } = require('punycode');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-
 
 app.use(expressLayouts);
 app.set('layout', './layouts/main'); // layout dosyanın yolu
@@ -55,6 +52,14 @@ const upload = multer({
             cb(new Error('Only image files are allowed!'), false);
         }
     }
+});
+
+const profilePictureStorage = multer.memoryStorage();
+const profilePictureUpload = multer({ 
+    storage: profilePictureStorage,
+    limits: {
+        fileSize: 10 * 1024 * 1024, // Limit file size to 10MB (optional)
+    },
 });
 
 // Middleware for handling multiple file uploads
@@ -748,14 +753,58 @@ app.post('/isManager', isAuthenticated, isHavePriv(2), (req, res) => {
 
 
 app.get('/profil', isAuthenticated, (req, res) => {
-        res.render('profil', {
-            title: 'Profil',
-            lang: req.cookies.locale,
-            loggedin: !!req.cookies.token,
-            username: req.user ? req.user.username : null,
-        });
+    res.render('profil', {
+        title: 'Profil',
+        lang: req.cookies.locale,
+        loggedin: !!req.cookies.token,
+        username: req.user ? req.user.username : null,
+    });
 });
 
+app.get('/getProfileData',isAuthenticated,(req,res)=>{
+    let userID = req.user.id;
+    let query = "SELECT * from user_details where user_ID = ?";
+    con.query(query,[userID],(err,result)=>{
+        if (err) {
+            return res.status(500).send("Failed to get Data");
+        }
+        if(result.length > 0){
+            res.send(result);
+        }else{
+            res.status(404).json({message: "User Data Not Found"});
+        }
+    });
+});
+
+app.post('/updateProfile', isAuthenticated, profilePictureUpload.single('profile_Picture'), (req, res) => {
+    let { full_name, std_Number, email, phone_Number } = req.body;
+
+    const userId = req.user.id;
+    const profile_Picture = req.file ? req.file.buffer : null;
+
+    const updateQuery = `
+        UPDATE user_details 
+        SET 
+            full_name = ?, 
+            std_Number = ?, 
+            profile_Picture = ?, 
+            email = ?, 
+            phone_Number = ? 
+        WHERE user_id = ?;
+    `;
+
+    con.query(updateQuery, [full_name, std_Number, profile_Picture, email, phone_Number, userId], (err, result) => {
+        if (err) {
+            console.error("Profile update failed:", err);
+            return res.status(500).send("Profile update failed.");
+        }
+        if (result.affectedRows > 0) {
+            res.send("Profile successfully updated.");
+        } else {
+            res.status(404).send("Profile not found.");
+        }
+    });
+});
 
 
 app.get('/etkinlikOnayPaneli', isAuthenticated, isHavePriv(3), (req, res) => {
@@ -930,35 +979,71 @@ app.get("/signup", (req, res) => {
 });
 
 app.get("/signup/check", (req, res) => {
-    const person =
-    {
+    const person = {
         username: req.query.username,
         password: req.query.password
-    }
+    };
+
     let usercheck = 'SELECT * FROM users WHERE BINARY user_Name = ?;';
     let name = [person.username];
     let hashedPassword = hashPassword(person.password);
 
-    con.query(usercheck, name, function (err, results) {
+    // Veritabanı bağlantısını başlat ve transaction başlat
+    con.beginTransaction((err) => {
         if (err) {
-            return res.status(500).send('Database query failed.');
+            return res.status(500).send('Database connection failed.');
         }
 
-        if (results.length > 0) {
-            return res.send("Bu Kullanıcı adı bulunuyor, giriş yapın yada başka bir kullanıcı adı seçin");
-        } else {
-            let createUserQuery = `INSERT INTO users VALUES(0,"${person.username}","${hashedPassword}",1);`;// Creates user with person.username, person.password , groupID = 2 , and the automatic userID
+        // Kullanıcı kontrolü
+        con.query(usercheck, name, function (err, results) {
+            if (err) {
+                return con.rollback(() => {
+                    res.status(500).send('Database query failed.');
+                });
+            }
 
-            con.query(createUserQuery, function (err, result) {
-                if (err) {
-                    console.error("Failed to create user:", err);
-                    return res.status(500).send("Failed to create user");
-                }
-                return res.redirect('/login');
-            });
-        }
+            if (results.length > 0) {
+                return res.send("Bu Kullanıcı adı bulunuyor, giriş yapın ya da başka bir kullanıcı adı seçin");
+            } else {
+                // Kullanıcıyı ekle
+                let createUserQuery = `INSERT INTO users VALUES(0,"${person.username}","${hashedPassword}",1);`;
+                con.query(createUserQuery, [person.username, hashedPassword], function (err, result) {
+                    if (err) {
+                        return con.rollback(() => {
+                            console.error("Failed to create user:", err);
+                            res.status(500).send("Failed to create user");
+                        });
+                    }
+
+                    // Eklenen kullanıcının ID'sini al
+                    const userId = result.insertId;
+
+                    // user_details tablosuna ekleme işlemi
+                    const createDetailsQuery = `INSERT INTO user_details (user_id) VALUES (?)`;
+                    con.query(createDetailsQuery, [userId, 'active'], function (err, result) {
+                        if (err) {
+                            return con.rollback(() => {
+                                console.error("Failed to create user details:", err);
+                                res.status(500).send("Failed to create user details");
+                            });
+                        }
+
+                        // Her iki ekleme başarılı olduysa commit işlemi
+                        con.commit((err) => {
+                            if (err) {
+                                return con.rollback(() => {
+                                    res.status(500).send('Transaction commit failed.');
+                                });
+                            }
+                            res.redirect('/login');
+                        });
+                    });
+                });
+            }
+        });
     });
 });
+
 
 
 
