@@ -687,7 +687,6 @@ app.post('/checkQrTokenForTicket',isAuthenticated,isHavePriv(2),(req,res)=>
     let eventID = req.body.eventID; // event id that manager sends to check ticket
     let userID = req.user.id;
     let checkQuery = `select * from events where events.events_ID = ? AND events.organizer_ID = ?;`;
-
     con.query(checkQuery,[eventID,userID],(err,checkResult)=>
     {
         if (err) {
@@ -700,7 +699,7 @@ app.post('/checkQrTokenForTicket',isAuthenticated,isHavePriv(2),(req,res)=>
                     return res.status(500).json({error: err});
                 }
                 else{
-                    let query = 'select seats.seats_Name, full_Name, std_Number,profile_Picture from tickets join seats on tickets_Seat_ID = seats.seats_ID join users on tickets_User_ID = users.user_ID join user_details on users.user_ID = user_details.user_ID where tickets_ID = ? and tickets_Event_ID = ?;';
+                    let query = 'select seats.seats_Name, users.user_Name from tickets join seats on tickets_Seat_ID = seats.seats_ID join users on tickets_User_ID = users.user_ID where tickets_ID = ? and tickets_Event_ID = ?;';
                     con.query(query,[decoded.id,eventID],(err,result)=>
                     {
                         if (err) {
