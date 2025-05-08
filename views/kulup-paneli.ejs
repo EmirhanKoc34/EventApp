@@ -34,10 +34,11 @@ document.addEventListener('DOMContentLoaded', async () => {
         `;
 
         events.forEach(event => {
-            const date = new Date(event.eventDate).toISOString().slice(0, 10);
+         
+   const date = new Date(event.eventDate).toISOString().slice(0, 10);
             const status = event.approved === 1 ? "✅ Onaylandı" :
-                           event.approved === 0 ? "⏳ Bekliyor" : "❌ Reddedildi";
-
+                           event.approved === 0 ? "❌ Reddedildi" : "⏳ Bekliyor";
+                           
             tableHTML += `
                 <tr>
                     <td>${event.eventName}</td>
